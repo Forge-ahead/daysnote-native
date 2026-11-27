@@ -1,7 +1,7 @@
 name: DaysNote
 options:
   deploymentTarget:
-    iOS: "17.0"
+    iOS: "15.0"
   bundleIdPrefix: com.daysnote
   createIntermediateGroups: true
   groupSortPosition: top
@@ -30,6 +30,7 @@ targets:
         CFBundleVersion: "31"
         UILaunchScreen: {}
         ITSAppUsesNonExemptEncryption: false
+        MinimumOSVersion: "15.0"
     entitlements:
       path: DaysNote/DaysNote.entitlements
     settings:
