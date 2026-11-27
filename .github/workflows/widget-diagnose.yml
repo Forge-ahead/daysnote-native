@@ -1,0 +1,77 @@
+name: Widget diagnose
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diag:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: brew install xcodegen ldid
+
+      - name: Generate project
+        run: |
+          set -euo pipefail
+          rm -rf DaysNote.xcodeproj
+          xcodegen generate --spec project.yml
+
+      - name: Build for simulator
+        run: |
+          set -euo pipefail
+          xcodebuild -project DaysNote.xcodeproj -scheme DaysNote \
+            -configuration Debug -sdk iphonesimulator \
+            -derivedDataPath "$PWD/.simbuild" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build
+
+      - name: Static dump of widget appex
+        run: |
+          set -euo pipefail
+          APPLEX=$(find "$PWD/.simbuild" -type d -name 'DaysNoteWidget.appex' | head -1)
+          echo "APPEX = $APPEX"
+          find "$APPEX" -maxdepth 1 -type f | sed 's/^/FILE: /'
+          echo "===== appex Info.plist ====="
+          plutil -p "$APPEX/Info.plist"
+          echo "===== ldid sign + entitlements self-check ====="
+          ldid -SDaysNoteWidget/DaysNoteWidget.entitlements "$APPEX/DaysNoteWidget"
+          ldid -e "$APPEX/DaysNoteWidget" || echo "ldid -e FAILED"
+
+      - name: Boot simulator
+        run: |
+          set -euo pipefail
+          DEVICE=$(xcrun simctl list devices available | grep -m1 'iPhone' | sed -E 's/.*\(([A-F0-9-]{36})\).*/\1/')
+          echo "DEVICE=$DEVICE" | tee device.env
+          xcrun simctl boot "$DEVICE" || true
+          xcrun simctl bootstatus "$DEVICE" -b
+
+      - name: Install app and register widgets
+        run: |
+          set -euo pipefail
+          DEVICE=$(cut -d= -f2 device.env)
+          APP=$(find "$PWD/.simbuild" -type d -name 'DaysNote.app' | head -1)
+          xcrun simctl install "$DEVICE" "$APP"
+          xcrun simctl launch "$DEVICE" com.daysnote.app || true
+          sleep 20
+          echo "===== pluginkit matching daysnote ====="
+          xcrun simctl spawn "$DEVICE" pluginkit -m -v -A | grep -i daysnote || echo "NO PLUGIN REGISTERED"
+
+      - name: Trigger widget timeline and capture logs
+        run: |
+          set -euo pipefail
+          DEVICE=$(cut -d= -f2 device.env)
+          xcrun simctl spawn "$DEVICE" log collect --output /tmp/wk.logarchive || true
+          xcrun simctl spawn "$DEVICE" log show --archive /tmp/wk.logarchive --last 5m \
+            --predicate 'process CONTAINS[c] "widget" OR process CONTAINS[c] "daysnote"' \
+            2>/dev/null | tail -200 > widget-log.txt || true
+          wc -l widget-log.txt
+          grep -iE "error|fail|crash|invalid|reject|denied|daysnote" widget-log.txt | head -80 || echo "no error lines"
+
+      - name: Upload diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: widget-diagnose
+          path: |
+            widget-log.txt
+          if-no-files-found: warn
