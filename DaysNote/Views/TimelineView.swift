@@ -18,6 +18,8 @@ struct TimelineView: View {
     @AppStorage("daysnote.timeline.cat.v1") private var selectedCat = "all"
 
     @State private var didInit = false
+    // 筛选变化时强制重建列表（LazyVStack 会缓存行内容，@AppStorage 变更不会重算已渲染行）
+    @State private var refreshID = UUID()
 
     private var thisYear: Int { Calendar(identifier: .gregorian).component(.year, from: Date()) }
     private var today: Date { DateUtils.startOfToday() }
@@ -115,7 +117,10 @@ struct TimelineView: View {
                                 .padding(.vertical, 22).frame(maxWidth: .infinity)
                         }
                         .padding(.top, 4)
+                        .id(refreshID)
                     }
+                    .onChange(of: scope) { _ in reload(proxy) }
+                    .onChange(of: selectedCat) { _ in reload(proxy) }
                     .onAppear {
                         guard !didInit else { return }
                         didInit = true
@@ -132,6 +137,14 @@ struct TimelineView: View {
                     Button(action: onAdd) { Image(systemName: "plus").font(.system(size: 16, weight: .semibold)) }
                 }
             }
+        }
+    }
+
+    // 筛选/分类切换后立即重算列表并重新定位到今年
+    private func reload(_ proxy: ScrollViewProxy) {
+        refreshID = UUID()
+        DispatchQueue.main.async {
+            withAnimation { proxy.scrollTo("year-\(self.thisYear)", anchor: .top) }
         }
     }
 
