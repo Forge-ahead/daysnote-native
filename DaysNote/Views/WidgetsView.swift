@@ -48,35 +48,50 @@ private struct WidgetTemplate: Identifiable, Equatable {
     var skin: WidgetSkin
 
     static let all: [WidgetTemplate] = [
-        .init(id: "holiday-official", name: "假日 · 法定节假日", category: "中", kind: "holiday", size: "medium", slots: 4,
-              desc: "左侧显示距离下一个法定节假日还剩几天 + 「休」+ 放假区间（每月联网更新国务院安排）；右侧显示指定分类的事件，按临近日期排序",
+        // ===== 小 2×2 =====
+        // 图3左：简约倒计时列表 · 纯数字（右侧色块数字，无「天」）
+        .init(id: "simple-number", name: "简约倒计时列表 · 纯数字", category: "小", kind: "simpleNumber", size: "small", slots: 3,
+              desc: "图3左同款：2×2 紧凑三行，右侧蓝/橙色块数字（无「天」）",
+              skin: .init(bg: "#f2f2f0", bgAccent: "#ffffff", ink: "#4a4844", inkSoft: "#a6a29a",
+                          brand: "#4a4844", rowBg: "#ffffff", hot: "#4a90d9", far: "#f0a04b",
+                          chipOn: "#4a4844", chipOnInk: "#ffffff")),
+        // ===== 中 4×2 =====
+        // 图4：节日 · 经典白
+        .init(id: "holiday-official", name: "节日 · 经典白", category: "中", kind: "holiday", size: "medium", slots: 4,
+              desc: "图4同款：左侧距离法定节假日 + 大数字 + 「休」放假区间 + 星期条；右侧 4 行节日清单",
               holiday: true,
               skin: .init(bg: "#fbfaf7", bgAccent: "#f2f0ea", ink: "#3a3835", inkSoft: "#a6a29a",
                           brand: "#4a4844", rowBg: "#ffffff", hot: "#5b9bd5", far: "#e79a45",
                           chipOn: "#4a4844", chipOnInk: "#ffffff")),
-        .init(id: "holiday-fresh", name: "假日 · 清新绿", category: "中", kind: "holiday", size: "medium", slots: 4,
-              desc: "同上假日组件的清新绿皮肤，左侧法定节假日 + 右侧分类事件",
+        // 图5：节日 · 清新绿
+        .init(id: "holiday-fresh", name: "节日 · 清新绿", category: "中", kind: "holiday", size: "medium", slots: 4,
+              desc: "图5同款：经典白的清新绿皮肤，左侧距离节假日 + 右侧 4 行节日清单",
               holiday: true,
               skin: .init(bg: "#eef0e6", bgAccent: "#e3e8d8", ink: "#4a6141", inkSoft: "#93a488",
                           brand: "#5c8a4a", rowBg: "#ffffff", hot: "#5b9bd5", far: "#e79a45",
                           chipOn: "#6f9a5d", chipOnInk: "#ffffff")),
-        .init(id: "grid-rose", name: "四宫格面板 · 柔粉", category: "中", kind: "grid", size: "medium", slots: 4,
-              desc: "图4同款：2×2 卡片，emoji + 标题 + 日期 + 大数字",
-              skin: .init(bg: "#fbedef", bgAccent: "#f7dfe3", ink: "#a05a68", inkSoft: "#c2949e",
-                          brand: "#b46876", rowBg: "#f8d7de", hot: "#d98a99", far: "#c9818e",
-                          chipOn: "#b46876", chipOnInk: "#ffffff")),
-        .init(id: "simple-day", name: "简约列表 · 带“天”", category: "小", kind: "simple", size: "small", slots: 3,
-              desc: "图3右同款：2×2 紧凑三行，数字与「天」分格显示",
+        // 图3右：简约倒计时列表 · 带天（4×2，数字与天分格）
+        .init(id: "simple-day", name: "简约倒计时列表 · 带天", category: "中", kind: "simple", size: "medium", slots: 3,
+              desc: "图3右同款：4×2 三行，数字与「天」分色块显示",
               skin: .init(bg: "#f2f2f0", bgAccent: "#ffffff", ink: "#4a4844", inkSoft: "#a6a29a",
                           brand: "#4a4844", rowBg: "#ffffff", hot: "#4a90d9", far: "#f0a04b",
                           chipOn: "#4a4844", chipOnInk: "#ffffff")),
-        .init(id: "picture-teal", name: "图文列表 · 青绿", category: "大", kind: "picture", size: "large", slots: 5,
-              desc: "图5上同款：青绿背景 + 顶部日期 + 5 行半透明卡片",
+        // ===== 大 4×4 =====
+        // 图2：倒计时面板（粉底 2×2 四大卡）
+        .init(id: "grid-rose", name: "倒计时面板", category: "大", kind: "grid", size: "large", slots: 4,
+              desc: "图2同款：4×4 粉底，2×2 四大卡，emoji + 标题 + 日期 + 大数字",
+              skin: .init(bg: "#fbedef", bgAccent: "#f7dfe3", ink: "#a05a68", inkSoft: "#c2949e",
+                          brand: "#b46876", rowBg: "#f8d7de", hot: "#d98a99", far: "#c9818e",
+                          chipOn: "#b46876", chipOnInk: "#ffffff")),
+        // 图1上：图文倒计时列表 · 大号
+        .init(id: "picture-teal", name: "图文倒计时列表 · 大号", category: "大", kind: "picture", size: "large", slots: 5,
+              desc: "图1上同款：4×4 青绿背景 + 顶部日期 + 5 行半透明卡片",
               skin: .init(bg: "#5c9e96", bgAccent: "#6aaba2", ink: "#ffffff", inkSoft: "#cfe6e1",
                           brand: "#ffffff", rowBg: "rgba(255,255,255,.20)", hot: "#4a90d9", far: "#f0a04b",
                           chipOn: "#ffffff", chipOnInk: "#5c9e96")),
-        .init(id: "list-bluehead", name: "简约列表 · 大号", category: "大", kind: "listLarge", size: "large", slots: 5,
-              desc: "图5下同款：白底蓝头 + 5 行色块数字",
+        // 图1下：简约倒计时列表 · 大号
+        .init(id: "list-bluehead", name: "简约倒计时列表 · 大号", category: "大", kind: "listLarge", size: "large", slots: 5,
+              desc: "图1下同款：4×4 白底蓝头 + 5 行色块数字",
               skin: .init(bg: "#ffffff", bgAccent: "#3b82d6", ink: "#4a4844", inkSoft: "#a6a29a",
                           brand: "#4a4844", rowBg: "#f5f6f8", hot: "#4a90d9", far: "#f0a04b",
                           chipOn: "#3b82d6", chipOnInk: "#ffffff")),
@@ -220,8 +235,8 @@ private struct WidgetPreviewView: View {
         Group {
             switch t.kind {
             case "holiday": HolidayPanel(t: t, evs: evs, holiday: holiday, mini: mini)
-            case "combo": ComboPanel(t: t, evs: evs, mini: mini)
-            case "simple": SimplePanel(t: t, evs: evs, mini: mini)
+            case "simpleNumber": SimplePanel(t: t, evs: evs, mini: mini, withTian: false)
+            case "simple": SimplePanel(t: t, evs: evs, mini: mini, withTian: true)
             case "grid": GridPanel(t: t, evs: evs, mini: mini)
             case "picture": PicturePanel(t: t, evs: evs, mini: mini)
             default: ListLargePanel(t: t, evs: evs, mini: mini)
@@ -351,6 +366,7 @@ private struct SimplePanel: View {
     let t: WidgetTemplate
     let evs: [BoundEvent]
     let mini: Bool
+    let withTian: Bool
 
     var body: some View {
         VStack(spacing: mini ? 3 : 5) {
@@ -361,7 +377,7 @@ private struct SimplePanel: View {
                     Spacer(minLength: 2)
                     HStack(spacing: 1) {
                         Text(daysText(e.days)).font(.system(size: mini ? 13 : 19, weight: .bold)).foregroundColor(.white)
-                        if t.id == "simple-day" { Text("天").font(.system(size: mini ? 6 : 9)).foregroundColor(.white.opacity(0.9)) }
+                        if withTian { Text("天").font(.system(size: mini ? 6 : 9)).foregroundColor(.white.opacity(0.9)) }
                     }
                     .padding(.horizontal, mini ? 5 : 9).padding(.vertical, mini ? 1 : 3)
                     .background(i < 2 ? wc(t.skin.hot) : wc(t.skin.far)).clipShape(RoundedRectangle(cornerRadius: 7))
