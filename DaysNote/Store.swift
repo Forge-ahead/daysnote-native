@@ -330,8 +330,12 @@ class Store: ObservableObject {
         }
     }
 
-    func doSync(resolve: [String: String] = [:]) async {
-        guard engine.isConfigured else { show(SyncError.notConfigured.localizedDescription); return }
+    func doSync(resolve: [String: String] = [:], silentIfUnconfigured: Bool = false) async {
+        guard engine.isConfigured else {
+            // 启动时的自动同步未配置云端时静默返回，不打扰用户
+            if !silentIfUnconfigured { show(SyncError.notConfigured.localizedDescription) }
+            return
+        }
         syncing = true; defer { syncing = false }
         do {
             let outcome = try await engine.syncAll(localDocs: allDocs(), oldBase: syncBase,
