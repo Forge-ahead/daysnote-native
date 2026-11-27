@@ -4,11 +4,18 @@ import SwiftUI
 
 enum Theme {
     static func background(_ style: BackgroundStyle) -> Color {
+        backgroundColor(style, dark: false)
+    }
+
+    /// 设置页缩略图用：仍是 pattern color，但按 V31 的 22pt 网格与更明显的线重新绘制
+    static func backgroundColor(_ style: BackgroundStyle, dark: Bool) -> Color {
         switch style {
-        case .grid: return Color(uiColor: UIColor(patternImage: gridImage()))
-        case .beige: return Color(hex: "#f3ead9")
-        case .cream: return Color(hex: "#fbfaf7")
-        case .gray: return Color(hex: "#eeece7")
+        case .grid:
+            if dark { return Color(hex: "#202024") }
+            return Color(uiColor: UIColor(patternImage: gridImage()))
+        case .beige: return Color(hex: dark ? "#2a2620" : "#f3ead9")
+        case .cream: return Color(hex: dark ? "#202024" : "#fbfaf7")
+        case .gray: return Color(hex: dark ? "#26262a" : "#eeece7")
         }
     }
     static let ink = Color(hex: "#3d3b3a")
@@ -18,15 +25,50 @@ enum Theme {
     static let accent = Color(hex: "#c2503c")
 
     private static func gridImage() -> UIImage {
-        let size: CGFloat = 12
+        // 与 Web V31 一致：22pt 方格，线色 rgba(214,211,202,.42)
+        let size: CGFloat = 22
         let fmt = UIGraphicsImageRendererFormat(); fmt.scale = UIScreen.main.scale
         return UIGraphicsImageRenderer(size: CGSize(width: size, height: size), format: fmt).image { ctx in
             UIColor(hex: "#fbfaf7").setFill(); ctx.fill(CGRect(x: 0, y: 0, width: size, height: size))
-            UIColor(hex: "#ece8df").setStroke()
+            UIColor(hex: "#d6d3ca").withAlphaComponent(0.42).setStroke()
             let p = UIBezierPath()
-            p.move(to: CGPoint(x: 0, y: 0)); p.addLine(to: CGPoint(x: size, y: 0))
-            p.move(to: CGPoint(x: 0, y: 0)); p.addLine(to: CGPoint(x: 0, y: size))
-            p.lineWidth = 0.5; p.stroke()
+            p.move(to: CGPoint(x: 0.5, y: 0)); p.addLine(to: CGPoint(x: 0.5, y: size))
+            p.move(to: CGPoint(x: 0, y: 0.5)); p.addLine(to: CGPoint(x: size, y: 0.5))
+            p.lineWidth = 1; p.stroke()
+        }
+    }
+}
+
+/// 主界面背景：格纹必须用真实 Path 绘制，SwiftUI 的 Color(patternImage:) 有些场景会被当成纯色
+struct GridBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
+    let style: BackgroundStyle
+
+    var body: some View {
+        ZStack {
+            Theme.backgroundColor(style, dark: colorScheme == .dark)
+            if style == .grid {
+                GeometryReader { geo in
+                    Path { p in
+                        let step: CGFloat = 22
+                        var x: CGFloat = 0
+                        while x <= geo.size.width {
+                            p.move(to: CGPoint(x: x, y: 0))
+                            p.addLine(to: CGPoint(x: x, y: geo.size.height))
+                            x += step
+                        }
+                        var y: CGFloat = 0
+                        while y <= geo.size.height {
+                            p.move(to: CGPoint(x: 0, y: y))
+                            p.addLine(to: CGPoint(x: geo.size.width, y: y))
+                            y += step
+                        }
+                    }
+                    .stroke(colorScheme == .dark ? Color.white.opacity(0.055) : Color(hex: "#d6d3ca").opacity(0.42),
+                            lineWidth: 1)
+                }
+                .allowsHitTesting(false)
+            }
         }
     }
 }
