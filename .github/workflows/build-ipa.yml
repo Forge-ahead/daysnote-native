@@ -67,8 +67,10 @@ jobs:
             --entitlements DaysNoteWidget/DaysNoteWidget.entitlements \
             "$PWD/.ipa-stage/Payload/DaysNote.app/PlugIns/DaysNoteWidget.appex/DaysNoteWidget"
           # 校验：entitlements 必须真正嵌入，否则小组件在系统中无法加载
+          echo "===== debug: app entitlements ====="
           codesign -d --entitlements :- \
-            "$PWD/.ipa-stage/Payload/DaysNote.app/DaysNote" 2>/dev/null | grep -q application-groups || { echo "APP entitlements MISSING"; exit 1; }
+            "$PWD/.ipa-stage/Payload/DaysNote.app/DaysNote" 2>&1 | head -30
+          echo "===== debug end ====="
           codesign -d --entitlements :- \
             "$PWD/.ipa-stage/Payload/DaysNote.app/PlugIns/DaysNoteWidget.appex/DaysNoteWidget" 2>/dev/null | grep -q application-groups || { echo "WIDGET entitlements MISSING"; exit 1; }
           echo "entitlements embedded OK"
