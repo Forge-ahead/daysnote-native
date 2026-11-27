@@ -68,7 +68,8 @@ struct TrashView: View {
                     emptyText("云端没有已删除的记录（未配置 CouchDB 时为空）")
                 } else {
                     CardPanel {
-                        ForEach(store.remoteTrash, id: \.self) { item in
+                        ForEach(store.remoteTrash.indices, id: \.self) { idx in
+                            let item = store.remoteTrash[idx]
                             let id = (item["id"] as? String) ?? ""
                             let detail = store.remoteDetails[id]
                             let open = expanded == id
