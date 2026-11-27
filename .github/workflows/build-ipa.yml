@@ -1,0 +1,60 @@
+name: Build native IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: List schemes
+        run: xcodebuild -list -project DaysNote.xcodeproj
+
+      - name: Archive (unsigned, device slice)
+        run: |
+          set -euo pipefail
+          xcodebuild archive \
+            -project DaysNote.xcodeproj \
+            -scheme DaysNote \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath "$PWD/DaysNote.xcarchive" \
+            -derivedDataPath "$PWD/.build" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            SKIP_INSTALL=NO
+
+      - name: Package IPA
+        run: |
+          set -euo pipefail
+          APP="$PWD/DaysNote.xcarchive/Products/Applications/DaysNote.app"
+          test -d "$APP"
+          rm -rf "$PWD/.ipa-stage"
+          mkdir -p "$PWD/.ipa-stage/Payload"
+          cp -R "$APP" "$PWD/.ipa-stage/Payload/DaysNote.app"
+          rm -rf "$PWD/.ipa-stage/Payload/DaysNote.app/_CodeSignature"
+          rm -f "$PWD/.ipa-stage/Payload/DaysNote.app/embedded.mobileprovision"
+          find "$PWD/.ipa-stage/Payload/DaysNote.app/PlugIns" -type d -name _CodeSignature -exec rm -rf {} + 2>/dev/null || true
+          (cd "$PWD/.ipa-stage" && zip -qry "$PWD/DaysNote-native-unsigned.ipa" Payload)
+          ls -lh "$PWD/DaysNote-native-unsigned.ipa"
+
+      - name: Verify IPA
+        run: |
+          set -euo pipefail
+          unzip -l DaysNote-native-unsigned.ipa | grep -E "Payload/DaysNote.app/DaysNote$|DaysNoteWidget.appex/DaysNoteWidget$|Info.plist" | head -20
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: DaysNote-native-unsigned
+          path: DaysNote-native-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 90
