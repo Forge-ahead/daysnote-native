@@ -24,6 +24,12 @@ targets:
       - DaysNote/DaysNote.entitlements
     info:
       path: DaysNote/Info.plist
+      properties:
+        CFBundleDisplayName: 纪念日
+        CFBundleShortVersionString: "3.0.0"
+        CFBundleVersion: "31"
+        UILaunchScreen: {}
+        ITSAppUsesNonExemptEncryption: false
     entitlements:
       path: DaysNote/DaysNote.entitlements
     settings:
@@ -45,6 +51,9 @@ targets:
       - DaysNoteWidget/DaysNoteWidget.entitlements
     info:
       path: DaysNoteWidget/Info.plist
+      properties:
+        CFBundleShortVersionString: "3.0.0"
+        CFBundleVersion: "31"
     entitlements:
       path: DaysNoteWidget/DaysNoteWidget.entitlements
     settings:
