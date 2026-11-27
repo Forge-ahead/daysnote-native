@@ -230,8 +230,15 @@ struct SettingsView: View {
             CardPanel {
                 RowSwitch(title: "每月自动备份", subtitle: nil, on: Binding(
                     get: { store.settings.autoBackup }, set: { store.settings.autoBackup = $0; store.save() }))
-                TextField("备份文件夹（WebDAV URL，可选）", text: Binding(get: { store.settings.backupFolder }, set: { store.settings.backupFolder = $0; store.save() }))
+                TextField("备份文件夹（完整 URL，以 / 结尾）", text: Binding(get: { store.settings.backupFolder }, set: { store.settings.backupFolder = $0; store.save() }))
                     .textFieldStyle(.roundedBorder).autocapitalization(.none)
+                TextField("WebDAV 用户名 / 复用同步凭证", text: Binding(get: { store.settings.webdavUser }, set: { store.settings.webdavUser = $0; store.save() }))
+                    .textFieldStyle(.roundedBorder).autocapitalization(.none)
+                SecureField("WebDAV 密码 / 复用同步凭证", text: Binding(get: { store.settings.webdavPassword }, set: { store.settings.webdavPassword = $0; store.save() }))
+                    .textFieldStyle(.roundedBorder)
+                Text("每月首次打开自动备份一次，文件名如 \(DateUtils.toISO(Date())).json。上次备份：\(store.lastBackupAt)")
+                    .font(.system(size: 11)).foregroundColor(Theme.muted)
+                PrimaryButton(title: "立即备份到 WebDAV") { Task { await store.backupNow() } }
                 PrimaryButton(title: "导出完整备份（含配置）") {
                     let url = store.exportJSON()
                     store.show("已导出到：\(url.lastPathComponent)")
