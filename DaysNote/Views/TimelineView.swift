@@ -20,7 +20,7 @@ struct TimelineView: View {
         for ev in store.events where ev.showInTimeline != false {
             let target = targetFor(ev)
             out.append(TimelineRow(date: target, icon: ev.icon, title: ev.title,
-                                   subtitle: DateUtils.lunarText(ev.date), color: ev.color, festival: false, event: ev))
+                                   subtitle: LunarCalendar.lunarText(ev.date), color: ev.color, festival: false, event: ev))
         }
         return out.sorted { $0.date < $1.date }
     }
