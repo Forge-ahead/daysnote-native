@@ -17,7 +17,8 @@ private enum WTheme {
 }
 
 // Widget 自带的数据模型（与主 App 的 Models.swift 结构一致，App 写入 App Group 供 Widget 读取）
-struct WidgetEvent: Codable, Equatable {
+struct WidgetEvent: Codable, Equatable, Identifiable {
+    var id: String { "\(title)|\(date)|\(icon)" }
     var title: String
     var icon: String
     var date: String
