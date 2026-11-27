@@ -67,11 +67,11 @@ def pbproj():
     a(f'\t\t{ids["mainGroup"]} = {{ isa = PBXGroup; children = ( {ids["appGroup"]}, {ids["widgetGroupFolder"]}, {ids["products"]} ); sourceTree = "<group>"; }};')
     # App group with subfolder Views
     views_group = uid()
-    children = ' '.join(f'{file_refs[f]} /* {os.path.basename(f)} */' for f in app_sources if '/' not in f)
+    children = ', '.join(f'{file_refs[f]} /* {os.path.basename(f)} */' for f in app_sources if '/' not in f)
     a(f'\t\t{ids["appGroup"]} = {{ isa = PBXGroup; children = ( {children}, {views_group} /* Views */, {ids["appInfo"]} /* Info.plist */, {ids["appEntitlements"]} /* DaysNote.entitlements */, {ids["appIcon"]} /* Assets.xcassets */ ); path = DaysNote; sourceTree = "<group>"; }};')
-    vchildren = ' '.join(f'{file_refs[f]} /* {os.path.basename(f)} */' for f in app_sources if '/' in f)
+    vchildren = ', '.join(f'{file_refs[f]} /* {os.path.basename(f)} */' for f in app_sources if '/' in f)
     a(f'\t\t{views_group} = {{ isa = PBXGroup; children = ( {vchildren} ); path = Views; sourceTree = "<group>"; }};')
-    wchildren = ' '.join(f'{file_refs[f]} /* {os.path.basename(f)} */' for f in widget_sources)
+    wchildren = ', '.join(f'{file_refs[f]} /* {os.path.basename(f)} */' for f in widget_sources)
     a(f'\t\t{ids["widgetGroupFolder"]} = {{ isa = PBXGroup; children = ( {wchildren}, {ids["widgetInfo"]} /* Info.plist */, {ids["widgetEntitlements"]} /* DaysNoteWidget.entitlements */ ); path = DaysNoteWidget; sourceTree = "<group>"; }};')
     a(f'\t\t{ids["products"]} = {{ isa = PBXGroup; children = ( {ids["appProduct"]} /* DaysNote.app */, {ids["widgetProduct"]} /* DaysNoteWidget.appex */ ); name = Products; sourceTree = "<group>"; }};')
 
@@ -136,13 +136,13 @@ def pbproj():
     a('\t\t};')
 
     # Build phases
-    app_src = ' '.join(f'{build_files[f]} /* {os.path.basename(f)} in Sources */' for f in app_sources if '/' not in f)
+    app_src = ', '.join(f'{build_files[f]} /* {os.path.basename(f)} in Sources */' for f in app_sources if '/' not in f)
     # Views files are in a group but still need build files; already created
-    app_src_all = ' '.join(f'{build_files[f]} /* {os.path.basename(f)} in Sources */' for f in app_sources)
+    app_src_all = ', '.join(f'{build_files[f]} /* {os.path.basename(f)} in Sources */' for f in app_sources)
     a(f'\t\t{ids["appBuildPhaseSources"]} /* Sources */ = {{ isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = ( {app_src_all} ); runOnlyForDeploymentPostprocessing = 0; }};')
     a(f'\t\t{ids["appBuildPhaseFrameworks"]} /* Frameworks */ = {{ isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = ( ); runOnlyForDeploymentPostprocessing = 0; }};')
     a(f'\t\t{ids["appBuildPhaseResources"]} /* Resources */ = {{ isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = ( {icon_bf} /* Assets.xcassets in Resources */ ); runOnlyForDeploymentPostprocessing = 0; }};')
-    w_src_all = ' '.join(f'{build_files[f]} /* {os.path.basename(f)} in Sources */' for f in widget_sources)
+    w_src_all = ', '.join(f'{build_files[f]} /* {os.path.basename(f)} in Sources */' for f in widget_sources)
     a(f'\t\t{ids["widgetBuildPhaseSources"]} /* Sources */ = {{ isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = ( {w_src_all} ); runOnlyForDeploymentPostprocessing = 0; }};')
     a(f'\t\t{ids["widgetBuildPhaseFrameworks"]} /* Frameworks */ = {{ isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = ( ); runOnlyForDeploymentPostprocessing = 0; }};')
     a(f'\t\t{ids["widgetBuildPhaseResources"]} /* Resources */ = {{ isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = ( ); runOnlyForDeploymentPostprocessing = 0; }};')
@@ -244,3 +244,41 @@ def pbproj():
 os.makedirs(os.path.join(ROOT,'DaysNote.xcodeproj'), exist_ok=True)
 open(os.path.join(ROOT,'DaysNote.xcodeproj','project.pbxproj'),'w').write(pbproj())
 print('project.pbxproj generated')
+
+# 生成与 target ID 匹配的共享 scheme，避免手工维护导致 ID 漂移
+scheme_dir = os.path.join(ROOT, 'DaysNote.xcodeproj', 'xcshareddata', 'xcschemes')
+os.makedirs(scheme_dir, exist_ok=True)
+app_id = ids['appTarget']
+ref = (
+    f'<BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="{app_id}" '
+    'BuildableName="DaysNote.app" BlueprintName="DaysNote" '
+    'ReferencedContainer="container:DaysNote.xcodeproj"/>'
+)
+scheme = f'''<?xml version="1.0" encoding="UTF-8"?>
+<Scheme LastUpgradeVersion="1600" version="1.7">
+   <BuildAction parallelizeBuildables="YES" buildImplicitDependencies="YES">
+      <BuildActionEntries>
+         <BuildActionEntry buildForTesting="YES" buildForRunning="YES" buildForProfiling="YES" buildForArchiving="YES" buildForAnalyzing="YES">
+            {ref}
+         </BuildActionEntry>
+      </BuildActionEntries>
+   </BuildAction>
+   <TestAction buildConfiguration="Debug" selectedDebuggerIdentifier="Xcode.DebuggerFoundation.Debugger.LLDB" selectedLauncherIdentifier="Xcode.DebuggerFoundation.Launcher.LLDB" shouldUseLaunchSchemeArgsEnv="YES">
+      <Testables/>
+   </TestAction>
+   <LaunchAction buildConfiguration="Release" selectedDebuggerIdentifier="Xcode.DebuggerFoundation.Debugger.LLDB" selectedLauncherIdentifier="Xcode.DebuggerFoundation.Launcher.LLDB" launchStyle="0" useCustomWorkingDirectory="NO" ignoresPersistentStateOnLaunch="NO" debugDocumentVersioning="YES" debugServiceExtension="internal" allowLocationSimulation="YES">
+      <BuildableProductRunnable runnableDebuggingMode="0">
+         {ref}
+      </BuildableProductRunnable>
+   </LaunchAction>
+   <ProfileAction buildConfiguration="Release" shouldUseLaunchSchemeArgsEnv="YES" savedToolIdentifier="" useCustomWorkingDirectory="NO" debugDocumentVersioning="YES">
+      <BuildableProductRunnable runnableDebuggingMode="0">
+         {ref}
+      </BuildableProductRunnable>
+   </ProfileAction>
+   <AnalyzeAction buildConfiguration="Debug"/>
+   <ArchiveAction buildConfiguration="Release" revealArchiveInOrganizer="YES"/>
+</Scheme>
+'''
+open(os.path.join(scheme_dir, 'DaysNote.xcscheme'), 'w', encoding='utf-8').write(scheme)
+print('DaysNote.xcscheme generated (app target ' + app_id + ')')
