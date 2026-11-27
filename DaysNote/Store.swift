@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import WidgetKit
 
 // MARK: - 持久化（JSON 文件放 App Group 容器，供 Widget 与 App 共用）
 
@@ -421,6 +422,8 @@ class Store: ObservableObject {
                                days: info.days, dir: info.dir, color: ev.color)
         }, holiday: holiday, updatedAt: Date().timeIntervalSince1970)
         Persistence.save(payload, to: Persistence.widgetURL)
+        // 关键：写入数据后必须通知 WidgetKit 重新拉取时间线，否则小组件不会更新
+        WidgetCenter.shared.reloadAllTimelines()
     }
 }
 
