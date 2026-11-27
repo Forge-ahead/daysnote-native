@@ -28,30 +28,36 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             build
 
-      - name: Boot simulator and launch app
+      - name: Boot simulator and launch app (strip widget extension to isolate)
         run: |
           set -euo pipefail
           DEVICE=$(xcrun simctl list devices available | grep -E 'iPhone' | head -1 | sed -E 's/.*\(([A-F0-9-]+)\).*/\1/')
           echo "DEVICE=$DEVICE"
-          xcrun simctl boot "$DEVICE" || true
+          xcrun simctl boot "$DEVICE" 2>/dev/null || true
           xcrun simctl bootstatus "$DEVICE" -b
+
           APP=$(find "$PWD/.simbuild" -type d -name 'DaysNote.app' | head -1)
           echo "APP=$APP"
+          # 移除 Widget 扩展，隔离测试主 App 代码（避免 extension placeholder 安装失败）
+          rm -rf "$APP/PlugIns"
+
           xcrun simctl install "$DEVICE" "$APP"
-          # 捕获启动日志
-          xcrun simctl launch "$DEVICE" com.daysnote.app > "$PWD/launch.out" 2>&1 || true
-          sleep 6
-          echo "=== launch.out ==="
-          cat "$PWD/launch.out"
-          echo "=== app logs ==="
-          xcrun simctl spawn "$DEVICE" log show --last 2m --predicate 'process == "DaysNote"' 2>/dev/null | tail -200 || true
+          echo "=== install ok ==="
+          set +e
+          xcrun simctl launch "$DEVICE" com.daysnote.app
+          echo "=== launch exit=$? ==="
+          sleep 8
+          echo "=== process state ==="
+          xcrun simctl spawn "$DEVICE" launchctl list 2>/dev/null | grep -i daysnote || echo "process not running"
+          echo "=== app logs (last 3m) ==="
+          xcrun simctl spawn "$DEVICE" log show --last 3m --style compact 2>/dev/null | grep -i -E 'daysnote|exception|crash|SIGABRT|Fatal' | tail -80 || true
           echo "=== crash reports ==="
-          find ~/Library/Logs/DiagnosticReports -iname 'DaysNote*' -newermt '-5 minutes' -exec sh -c 'echo "--- $1 ---"; cat "$1"' _ {} \; 2>/dev/null | head -400 || true
+          find ~/Library/Logs/DiagnosticReports -iname 'DaysNote*' -newermt '-10 minutes' -exec sh -c 'echo "--- $1 ---"; head -80 "$1"' _ {} \; 2>/dev/null || true
+          set -e
 
       - name: Upload diagnostics
         uses: actions/upload-artifact@v4
         with:
           name: crash-diagnostics
-          path: |
-            launch.out
+          path: launch.out
           if-no-files-found: ignore
