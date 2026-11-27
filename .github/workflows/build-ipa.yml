@@ -66,13 +66,14 @@ jobs:
           codesign --force --sign - --generate-entitlement-der \
             --entitlements DaysNoteWidget/DaysNoteWidget.entitlements \
             "$PWD/.ipa-stage/Payload/DaysNote.app/PlugIns/DaysNoteWidget.appex/DaysNoteWidget"
-          # 校验：entitlements 必须真正嵌入，否则小组件在系统中无法加载
-          echo "===== debug: app entitlements ====="
-          codesign -d --entitlements :- \
-            "$PWD/.ipa-stage/Payload/DaysNote.app/DaysNote" 2>&1 | head -30
-          echo "===== debug end ====="
-          codesign -d --entitlements :- \
-            "$PWD/.ipa-stage/Payload/DaysNote.app/PlugIns/DaysNoteWidget.appex/DaysNoteWidget" 2>/dev/null | grep -q application-groups || { echo "WIDGET entitlements MISSING"; exit 1; }
+          # 校验：entitlements 必须真正嵌入（DER 或 XML 槽位均算），否则小组件无法加载
+          APPBIN="$PWD/.ipa-stage/Payload/DaysNote.app/DaysNote"
+          WGBIN="$PWD/.ipa-stage/Payload/DaysNote.app/PlugIns/DaysNoteWidget.appex/DaysNoteWidget"
+          echo "===== entitlement strings check ====="
+          strings "$APPBIN" | grep -c application-groups || true
+          strings "$WGBIN" | grep -c application-groups || true
+          strings "$APPBIN" | grep -q application-groups || { echo "APP entitlements MISSING"; exit 1; }
+          strings "$WGBIN" | grep -q application-groups || { echo "WIDGET entitlements MISSING"; exit 1; }
           echo "entitlements embedded OK"
           (cd "$PWD/.ipa-stage" && zip -qry "$PWD/DaysNote-native-unsigned.ipa" Payload)
           # zip 可能把绝对路径重建为嵌套目录，规整到根
