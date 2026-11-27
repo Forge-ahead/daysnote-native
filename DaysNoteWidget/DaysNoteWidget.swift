@@ -344,7 +344,8 @@ private struct SimpleListView: View {
                         // 数字块贴右缘：数字色块 + 「天」分格（图3右），纯数字款无「天」格（图3左）
                         HStack(spacing: 0) {
                             Text(daysText(ev)).font(.system(size: rowH * 0.42, weight: .bold)).foregroundColor(.white)
-                                .frame(minWidth: blockH * 1.9, height: blockH, alignment: .center)
+                                .frame(minWidth: blockH * 1.9, alignment: .center)
+                                .frame(height: blockH)
                                 .background(base)
                             if withTian {
                                 Text("天").font(.system(size: rowH * 0.26, weight: .medium)).foregroundColor(.white)
