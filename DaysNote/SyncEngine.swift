@@ -116,7 +116,7 @@ struct SyncEngine {
     func couchWrite(_ docs: [[String: Any]]) async throws {
         guard !docs.isEmpty else { return }
         let r = try await Net.json(URL(string: couchBase() + "/_bulk_docs")!, method: "POST", headers: couchHeaders(), body: ["docs": docs])
-        guard r.ok else { throw SyncError.http(r.status, String(data: r.data, encoding: .utf8)?.prefix(120) ?? "") }
+        guard r.ok else { throw SyncError.http(r.status, String(String(data: r.data, encoding: .utf8)?.prefix(120) ?? "")) }
     }
 
     func webdavWrite(_ docs: [[String: Any]], token: String?) async throws {
