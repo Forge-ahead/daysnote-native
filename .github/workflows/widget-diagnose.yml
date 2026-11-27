@@ -29,8 +29,9 @@ jobs:
       - name: Static dump of widget appex
         run: |
           set -euo pipefail
-          APPLEX=$(find "$PWD/.simbuild" -type d -name 'DaysNoteWidget.appex' | head -1)
+          APPLEX=$(find "$PWD/.simbuild" -type d -name 'DaysNoteWidget.appex' -print -quit)
           echo "APPEX = $APPEX"
+          [ -z "$APPEX" ] && exit 1
           find "$APPEX" -maxdepth 1 -type f | sed 's/^/FILE: /'
           echo "===== appex Info.plist ====="
           plutil -p "$APPEX/Info.plist"
@@ -50,7 +51,9 @@ jobs:
         run: |
           set -euo pipefail
           DEVICE=$(cut -d= -f2 device.env)
-          APP=$(find "$PWD/.simbuild" -type d -name 'DaysNote.app' | head -1)
+          APP=$(find "$PWD/.simbuild" -type d -name 'DaysNote.app' -print -quit)
+          echo "APP = $APP"
+          [ -z "$APP" ] && exit 1
           xcrun simctl install "$DEVICE" "$APP"
           xcrun simctl launch "$DEVICE" com.daysnote.app || true
           sleep 20
