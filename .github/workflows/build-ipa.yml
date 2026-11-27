@@ -14,8 +14,8 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
-      - name: Install xcodegen
-        run: brew install xcodegen
+      - name: Install xcodegen and ldid
+        run: brew install xcodegen ldid
 
       - name: Generate Xcode project
         run: |
@@ -47,9 +47,12 @@ jobs:
           rm -rf "$PWD/.ipa-stage"
           mkdir -p "$PWD/.ipa-stage/Payload"
           cp -R "$APP" "$PWD/.ipa-stage/Payload/DaysNote.app"
-          rm -rf "$PWD/.ipa-stage/Payload/DaysNote.app/_CodeSignature"
           rm -f "$PWD/.ipa-stage/Payload/DaysNote.app/embedded.mobileprovision"
-          find "$PWD/.ipa-stage/Payload/DaysNote.app/PlugIns" -type d -name _CodeSignature -exec rm -rf {} + 2>/dev/null || true
+          # 关键：用 ldid 给主 App 与 Widget 扩展伪签名并嵌入 entitlements。
+          # 完全无签名的 appex 会被 iOS 拒绝加载（表现为桌面小组件全部无法加载）。
+          ldid -SDaysNote/DaysNote.entitlements "$PWD/.ipa-stage/Payload/DaysNote.app/DaysNote"
+          ldid -SDaysNoteWidget/DaysNoteWidget.entitlements \
+            "$PWD/.ipa-stage/Payload/DaysNote.app/PlugIns/DaysNoteWidget.appex/DaysNoteWidget"
           (cd "$PWD/.ipa-stage" && zip -qry "$PWD/DaysNote-native-unsigned.ipa" Payload)
           # zip 可能把绝对路径重建为嵌套目录，规整到根
           if [ ! -f "$PWD/DaysNote-native-unsigned.ipa" ] && [ -f "$PWD/.ipa-stage/DaysNote-native-unsigned.ipa" ]; then
