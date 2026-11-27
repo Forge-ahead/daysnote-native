@@ -235,31 +235,31 @@ struct GridRoseWidget: Widget {
             WidgetRoot { GridRoseView(entry: e) }
         }
         .configurationDisplayName("倒计时面板")
-        .description("粉底 · 2×2 四大卡 · 4×4")
-        .supportedFamilies([.systemLarge])
+        .description("粉底 · 2×2 四大卡 · 4×2 中号")
+        .supportedFamilies([.systemMedium])
     }
 }
 private struct GridRoseView: View {
     let entry: Entry
     var body: some View {
-        LazyVGrid(columns: [GridItem(.flexible(), spacing: 7), GridItem(.flexible(), spacing: 7)], spacing: 7) {
+        LazyVGrid(columns: [GridItem(.flexible(), spacing: 6), GridItem(.flexible(), spacing: 6)], spacing: 6) {
             ForEach(0..<min(4, entry.payload.events.count), id: \.self) { i in
                 let ev = entry.payload.events[i]
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 3) {
-                        if !ev.icon.isEmpty { Text(ev.icon).font(.system(size: 14)) }
-                        Text(ev.title).font(.system(size: 11, weight: .semibold)).foregroundColor(.white).lineLimit(1)
+                VStack(alignment: .leading, spacing: 1) {
+                    HStack(spacing: 2) {
+                        if !ev.icon.isEmpty { Text(ev.icon).font(.system(size: 11)) }
+                        Text(ev.title).font(.system(size: 10, weight: .semibold)).foregroundColor(.white).lineLimit(1)
                     }
-                    Text("\(shortDate(ev.date)) \(weekName(weekIndex(ev.date)))").font(.system(size: 9)).foregroundColor(.white.opacity(0.88))
+                    Text("\(shortDate(ev.date)) \(weekName(weekIndex(ev.date)))").font(.system(size: 8)).foregroundColor(.white.opacity(0.9))
                     Spacer(minLength: 1)
-                    HStack { Spacer(); Text(daysText(ev)).font(.system(size: 26, weight: .bold)).foregroundColor(.white) }
+                    HStack { Spacer(); Text(daysText(ev)).font(.system(size: 20, weight: .bold)).foregroundColor(.white) }
                 }
-                .padding(10).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                .padding(7).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
                 .background(LinearGradient(gradient: Gradient(colors: [Color(hexW: "#f0a8b8"), Color(hexW: "#e896ab")]), startPoint: .topLeading, endPoint: .bottomTrailing))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .clipShape(RoundedRectangle(cornerRadius: 9))
             }
         }
-        .padding(10).background(Color(hexW: "#fbedef"))
+        .padding(9).background(Color(hexW: "#fbedef"))
     }
 }
 
@@ -297,30 +297,39 @@ private struct SimpleListView: View {
     let withTian: Bool
     let medium: Bool
     var body: some View {
-        VStack(spacing: medium ? 5 : 4) {
+        VStack(spacing: medium ? 6 : 5) {
             ForEach(0..<min(3, entry.payload.events.count), id: \.self) { i in
                 let ev = entry.payload.events[i]
+                let base = i < 2 ? Color(hexW: "#4a90d9") : Color(hexW: "#f0a04b")
+                let deep = i < 2 ? Color(hexW: "#3579c4") : Color(hexW: "#d98a2f")
                 HStack(spacing: 4) {
                     HStack(spacing: 3) {
-                        Text(ev.title).font(.system(size: medium ? 14 : 12, weight: .semibold)).foregroundColor(Color(hexW: "#4a4844")).lineLimit(1)
-                        if !ev.icon.isEmpty { Text(ev.icon).font(.system(size: medium ? 13 : 11)) }
+                        Text(ev.title).font(.system(size: medium ? 15 : 13, weight: .semibold)).foregroundColor(Color(hexW: "#4a4844")).lineLimit(1)
+                        if !ev.icon.isEmpty { Text(ev.icon).font(.system(size: medium ? 14 : 12)) }
                     }
                     Spacer(minLength: 2)
-                    HStack(spacing: 1) {
-                        Text(daysText(ev)).font(.system(size: medium ? 19 : 16, weight: .bold)).foregroundColor(.white)
-                        if withTian { Text("天").font(.system(size: medium ? 9 : 8)).foregroundColor(.white.opacity(0.9)) }
+                    // 数字块贴右缘：数字色块 + 「天」分格（图3右），纯数字款无「天」格（图3左）
+                    HStack(spacing: 0) {
+                        Text(daysText(ev)).font(.system(size: medium ? 20 : 17, weight: .bold)).foregroundColor(.white)
+                            .frame(minWidth: medium ? 52 : 42, alignment: .center)
+                            .padding(.vertical, medium ? 5 : 3)
+                            .background(base)
+                        if withTian {
+                            Text("天").font(.system(size: medium ? 12 : 10, weight: .medium)).foregroundColor(.white)
+                                .frame(width: medium ? 32 : 26, alignment: .center)
+                                .padding(.vertical, medium ? 5 : 3)
+                                .background(deep)
+                        }
                     }
-                    .padding(.horizontal, medium ? 8 : 6).padding(.vertical, medium ? 3 : 2)
-                    .background(i < 2 ? Color(hexW: "#4a90d9") : Color(hexW: "#f0a04b"))
-                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                    .clipShape(RoundedRectangle(cornerRadius: medium ? 7 : 6))
                 }
-                .padding(.horizontal, medium ? 9 : 7).frame(height: medium ? 40 : 32)
-                .background(Color.white).clipShape(RoundedRectangle(cornerRadius: 8))
+                .padding(.horizontal, medium ? 10 : 8).frame(height: medium ? 42 : 34)
+                .background(Color.white).clipShape(RoundedRectangle(cornerRadius: medium ? 9 : 8))
             }
             if entry.payload.events.isEmpty { Text("暂无事件").font(.system(size: 11)).foregroundColor(Color(hexW: "#a6a29a")) }
             Spacer(minLength: 0)
         }
-        .padding(medium ? 9 : 7).background(Color(hexW: "#f2f2f0"))
+        .padding(medium ? 9 : 8).background(Color(hexW: "#f2f2f0"))
     }
 }
 
@@ -365,15 +374,17 @@ private struct HolidayView: View {
             HStack(spacing: 0) {
                 VStack(alignment: .leading, spacing: 3) {
                     if let h = entry.payload.holiday {
-                        Text("距离\(h.name)").font(.system(size: 11, weight: .bold)).foregroundColor(brand)
+                        Text(h.inProgress ? "\(h.name) · 假期中" : "距离\(h.name)").font(.system(size: 11, weight: .bold)).foregroundColor(brand)
                         HStack(alignment: .firstTextBaseline, spacing: 2) {
-                            Text(h.inProgress ? "进行中" : "\(h.daysLeft)").font(.system(size: 34, weight: .bold)).foregroundColor(brand)
-                            if !h.inProgress { Text("天").font(.system(size: 11)).foregroundColor(brand) }
+                            // 假期中显示整个假期天数，不再只显示剩余 1 天
+                            Text(h.inProgress ? "\(h.holidayDays)" : "\(h.daysLeft)").font(.system(size: 34, weight: .bold)).foregroundColor(brand)
+                            Text("天").font(.system(size: 11)).foregroundColor(brand)
                         }
                         if !h.rangeText.isEmpty {
                             HStack(spacing: 3) {
                                 Text("休").font(.system(size: 8, weight: .bold)).foregroundColor(.white)
                                     .padding(.horizontal, 3).padding(.vertical, 1).background(chipOn).clipShape(Capsule())
+                                // 显示完整放假区间（如 01/01 - 01/03）
                                 Text(h.rangeText).font(.system(size: 9)).foregroundColor(ink).lineLimit(1)
                             }
                         }
