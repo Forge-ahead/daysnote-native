@@ -44,6 +44,16 @@ struct Net {
     }
 }
 
+// MARK: - 精简备份载荷（对齐 Web V31，只保留业务字段）
+
+private struct BackupPayload: Codable {
+    var v: Int = 2
+    var app: String = "DaysNote"
+    var exportedAt: String
+    var categories: [Category]
+    var events: [EventItem]
+}
+
 // MARK: - 内容指纹（忽略元字段）
 
 func docHash(_ doc: [String: Any]) -> String {
@@ -380,6 +390,31 @@ struct SyncEngine {
             try await webdavWrite(davDocs, token: davToken)
         }
         return out
+    }
+
+    // ---- 每月 WebDAV 备份 ----
+    /// 复用「同步」页里的 WebDAV 用户名/密码，PUT 到备份文件夹/YYYY-MM-DD.json
+    func backup(categories: [Category], events: [EventItem]) async -> (ok: Bool, message: String) {
+        let folder = settings.backupFolder.trimmingCharacters(in: .whitespacesAndNewlines)
+            .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        guard !folder.isEmpty else { return (false, "未设置备份文件夹") }
+        let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd"; f.timeZone = .current
+        let day = f.string(from: Date())
+        guard let url = URL(string: "\(folder)/\(day).json") else { return (false, "备份地址格式不正确") }
+
+        let iso = ISO8601DateFormatter()
+        let payload = BackupPayload(exportedAt: iso.string(from: Date()), categories: categories, events: events)
+        guard let body = try? JSONEncoder().encode(payload) else { return (false, "备份数据编码失败") }
+
+        do {
+            let r = try await Net.request(url, method: "PUT", headers: Net.basic(settings.webdavUser, settings.webdavPassword), body: body)
+            guard r.ok else { return (false, "备份失败 HTTP \(r.status)") }
+            let monthFmt = DateFormatter(); monthFmt.dateFormat = "yyyy-MM"; monthFmt.timeZone = .current
+            UserDefaults.standard.set(monthFmt.string(from: Date()), forKey: "daysnote.lastBackup.v1")
+            return (true, "已备份至 \(day).json（\(String(format: "%.1f", Double(body.count) / 1024.0)) KB）")
+        } catch {
+            return (false, "备份失败：\(error.localizedDescription)")
+        }
     }
 
     // ---- 强制覆盖 ----
