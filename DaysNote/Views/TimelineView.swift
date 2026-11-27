@@ -77,7 +77,9 @@ struct TimelineView: View {
         let f = DateFormatter(); f.dateFormat = "MM.dd"; return f.string(from: d)
     }
     private func week(_ d: Date) -> String {
-        "周" + "日一二三四五六"[Calendar(identifier: .gregorian).component(.weekday, from: d) - 1]
+        let symbols = Array("日一二三四五六")
+        let idx = Calendar(identifier: .gregorian).component(.weekday, from: d) - 1
+        return "周" + String(symbols[max(0, min(symbols.count - 1, idx))])
     }
 
     var body: some View {
