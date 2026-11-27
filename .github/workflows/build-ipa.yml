@@ -51,6 +51,10 @@ jobs:
           rm -f "$PWD/.ipa-stage/Payload/DaysNote.app/embedded.mobileprovision"
           find "$PWD/.ipa-stage/Payload/DaysNote.app/PlugIns" -type d -name _CodeSignature -exec rm -rf {} + 2>/dev/null || true
           (cd "$PWD/.ipa-stage" && zip -qry "$PWD/DaysNote-native-unsigned.ipa" Payload)
+          # zip 可能把绝对路径重建为嵌套目录，规整到根
+          if [ ! -f "$PWD/DaysNote-native-unsigned.ipa" ] && [ -f "$PWD/.ipa-stage/DaysNote-native-unsigned.ipa" ]; then
+            mv "$PWD/.ipa-stage/DaysNote-native-unsigned.ipa" "$PWD/DaysNote-native-unsigned.ipa"
+          fi
           ls -lh "$PWD/DaysNote-native-unsigned.ipa"
 
       - name: Verify IPA
