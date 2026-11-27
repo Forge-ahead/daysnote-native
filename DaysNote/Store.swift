@@ -102,6 +102,7 @@ class Store: ObservableObject {
     @Published var syncing = false
     @Published var lastSync = "尚未同步"
     @Published var lastSyncDetail = ""
+    @Published var lastBackupAt = UserDefaults.standard.string(forKey: "daysnote.lastBackup.v1").map { $0 + " 已备份" } ?? "从未备份"
     @Published var dbSize: (active: Int64, disk: Int64, docCount: Int64, delCount: Int64)? = nil
     @Published var holiday: HolidayCountdown? = nil
     @Published var toast: String? = nil
@@ -376,6 +377,24 @@ class Store: ObservableObject {
     }
 
     func testConnection() async { show(await engine.testConnection()) }
+
+    // ---- WebDAV 月度备份 ----
+    func autoBackupIfNeeded() {
+        guard settings.autoBackup, !settings.backupFolder.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        let f = DateFormatter(); f.dateFormat = "yyyy-MM"; f.timeZone = .current
+        let month = f.string(from: Date())
+        guard UserDefaults.standard.string(forKey: "daysnote.lastBackup.v1") != month else { return }
+        Task { await backupNow(silent: true) }
+    }
+
+    func backupNow(silent: Bool = false) async {
+        let result = await engine.backup(categories: categories, events: events)
+        if result.ok {
+            let f = DateFormatter(); f.dateFormat = "yyyy-MM"; f.timeZone = .current
+            lastBackupAt = f.string(from: Date()) + " 已备份"
+        }
+        if !silent || result.ok { show(result.message) }
+    }
 
     // ---- 备份导出/导入 ----
     func exportJSON() -> URL {
