@@ -121,7 +121,7 @@ struct WidgetTemplate: Identifiable, Equatable {
     var slots: Int
     var desc: String
     var skin: Skin
-    struct Skin { var bg: String; var inkSoft: String }
+    struct Skin: Equatable { var bg: String; var inkSoft: String }
     static let all: [WidgetTemplate] = [
         .init(id: "holiday-official", name: "假日 · 法定节假日", category: "中", icon: "🎉", slots: 4,
               desc: "左侧法定节假日倒计时 + 右侧分类事件（每月联网更新）",
