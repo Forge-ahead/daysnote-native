@@ -48,7 +48,7 @@ struct Net {
 
 func docHash(_ doc: [String: Any]) -> String {
     let skip = Set(["_rev", "updatedAt", "_deleted", "deletedAt"])
-    let stable = { (v: Any) -> Any in
+    func stable(_ v: Any) -> Any {
         if let arr = v as? [Any] { return arr.map(stable) }
         if let dict = v as? [String: Any] {
             var o: [String: Any] = [:]
