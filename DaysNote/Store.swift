@@ -79,7 +79,7 @@ enum Seed {
     static func events() -> [EventItem] {
         [EventItem(id: "event:bi:together", title: "在一起", date: "2019-11-04", lunar: false,
                    categoryId: "cat:anniv", icon: "🍒", color: "#8ad0c5", note: "", order: 0,
-                   repeatMode: .none, showInTimeline: true, displayMode: .countup,
+                   repeatMode: .none, showInTimeline: true, displayMode: .both,
                    createdAt: 1700000000000, updatedAt: 1700000000000)]
     }
     static func uid(_ prefix: String) -> String {
@@ -137,6 +137,14 @@ class Store: ObservableObject {
         }
         tombstones = (Persistence.loadJSON(Persistence.tombURL)?["ids"] as? [String]) ?? []
         trash = Persistence.load([TrashItem].self, from: Persistence.trashURL) ?? []
+        // 一次性迁移：内置事件「在一起」默认显示 正数 + 倒数
+        if !UserDefaults.standard.bool(forKey: "daysnote.migrate.togetherBoth.v1") {
+            if let i = events.firstIndex(where: { $0.id == "event:bi:together" && $0.displayMode != .both }) {
+                events[i].displayMode = .both
+                save()
+            }
+            UserDefaults.standard.set(true, forKey: "daysnote.migrate.togetherBoth.v1")
+        }
         // 清理 v28 遗留的内置事件删除标记，但保留伪事件 yearleft
         let cleaned = tombstones.filter { !["event:bi:birthday", "event:bi:marriage", "event:bi:joinlianjia"].contains($0) }
         var final = cleaned
