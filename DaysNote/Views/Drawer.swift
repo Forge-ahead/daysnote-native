@@ -46,37 +46,45 @@ struct Drawer: View {
                             ScrollView {
                                 ForEach(results) { ev in
                                     Button(action: { onSelectEvent(ev) }) {
-                                        HStack(spacing: 10) {
-                                            Text(ev.icon).font(.system(size: 18))
-                                            VStack(alignment: .leading) {
-                                                Text(ev.title).font(.system(size: 14))
+                                        HStack(spacing: 11) {
+                                            Text(ev.icon).font(.system(size: 20)).frame(width: 24)
+                                            VStack(alignment: .leading, spacing: 2) {
+                                                Text(ev.title).font(.system(size: 14, weight: .semibold)).lineLimit(1)
                                                 Text(ev.date).font(.system(size: 11)).foregroundColor(Theme.muted)
                                             }
                                             Spacer()
                                             Image(systemName: "chevron.right").font(.system(size: 12)).foregroundColor(Theme.muted)
-                                        }.padding(.vertical, 8)
+                                        }
+                                        .frame(minHeight: 50).padding(.horizontal, 10)
                                     }
                                 }
+                                .padding(.horizontal, 10)
                             }
                         } else {
                             SectionTitle(text: "全部分类")
                             ScrollView {
-                                ForEach(store.categories) { c in
-                                    Button(action: { onPickCategory(c.id) }) {
-                                        HStack(spacing: 10) {
-                                            Circle().fill(Color(hex: c.color)).frame(width: 12, height: 12)
-                                            Text(c.name).font(.system(size: 15)).foregroundColor(Theme.ink)
-                                            Spacer()
-                                            Text("\(store.events.filter { c.id == "cat:all" || $0.categoryId == c.id }.count)")
-                                                .font(.system(size: 12)).foregroundColor(Theme.muted)
-                                            Image(systemName: "chevron.right").font(.system(size: 12)).foregroundColor(Theme.muted)
+                                VStack(spacing: 2) {
+                                    ForEach(store.categories) { c in
+                                        Button(action: { onPickCategory(c.id) }) {
+                                            HStack(spacing: 11) {
+                                                RoundedRectangle(cornerRadius: 7).fill(Color(hex: c.color))
+                                                    .frame(width: 20, height: 20)
+                                                    .shadow(color: .black.opacity(0.1), radius: 2, y: 1)
+                                                Text(c.name).font(.system(size: 15)).foregroundColor(Theme.ink).lineLimit(1)
+                                                Spacer()
+                                                Text("\(store.events.filter { c.id == "cat:all" || $0.categoryId == c.id }.count)")
+                                                    .font(.system(size: 13)).foregroundColor(Theme.muted).frame(minWidth: 24, alignment: .trailing)
+                                                Image(systemName: "chevron.right").font(.system(size: 12)).foregroundColor(Theme.muted)
+                                            }
+                                            .frame(minHeight: 50).padding(.horizontal, 10).padding(.vertical, 8)
+                                            .background(currentCat == c.id ? Color(uiColor: .secondarySystemBackground) : Color.clear)
+                                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                                            .contentShape(Rectangle())
                                         }
-                                        .padding(.vertical, 10)
-                                        .padding(.horizontal, 8)
-                                        .background(currentCat == c.id ? Color(hex: "#f0ece1") : Color.clear)
-                                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                                        .buttonStyle(.plain)
                                     }
                                 }
+                                .padding(.horizontal, 10)
                             }
                         }
 
