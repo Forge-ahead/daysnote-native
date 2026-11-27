@@ -13,24 +13,35 @@ struct SettingsView: View {
     private let tabs = ["外观", "同步", "AI 助手", "数据"]
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 12) {
-                Text("🌿").font(.system(size: 44))
-                Text("纪念日").font(.system(size: 20, weight: .bold))
-                Text("手绘风 · 多端同步 · AI 管理").font(.system(size: 11)).foregroundColor(Theme.muted)
+        ZStack {
+            ScrollView {
+                VStack(spacing: 12) {
+                    Text("🌿").font(.system(size: 44))
+                    Text("纪念日").font(.system(size: 20, weight: .bold))
+                    Text("手绘风 · 多端同步 · AI 管理").font(.system(size: 11)).foregroundColor(Theme.muted)
 
-                Picker("", selection: $tab) {
-                    ForEach(0..<tabs.count, id: \.self) { Text(tabs[$0]).tag($0) }
-                }.pickerStyle(.segmented)
+                    Picker("", selection: $tab) {
+                        ForEach(0..<tabs.count, id: \.self) { Text(tabs[$0]).tag($0) }
+                    }.pickerStyle(.segmented)
 
-                switch tab {
-                case 0: appearanceTab
-                case 1: syncTab
-                case 2: aiTab
-                default: dataTab
+                    switch tab {
+                    case 0: appearanceTab
+                    case 1: syncTab
+                    case 2: aiTab
+                    default: dataTab
+                    }
                 }
+                .padding(.horizontal, 14).padding(.bottom, 30)
             }
-            .padding(.horizontal, 14).padding(.bottom, 30)
+
+            if let c = confirm {
+                // V31 风格：半透明遮罩 + 居中风险确认弹窗
+                Color.black.opacity(0.42)
+                    .ignoresSafeArea()
+                    .onTapGesture { confirm = nil }
+                riskDialog(c)
+                    .padding(.horizontal, 24)
+            }
         }
     }
 
@@ -145,8 +156,6 @@ struct SettingsView: View {
                     .font(.system(size: 11)).foregroundColor(Theme.muted)
             }
 
-            if let c = confirm { riskDialog(c) }
-
             if !store.conflicts.isEmpty {
                 SectionTitle(text: "同步冲突 · \(store.conflicts.count)")
                 CardPanel {
@@ -167,14 +176,30 @@ struct SettingsView: View {
 
     @ViewBuilder
     private func riskDialog(_ kind: String) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(spacing: 14) {
             Text(kind == "push" ? "本地覆盖服务器" : "服务器覆盖本地")
-                .font(.system(size: 16, weight: .bold))
-            Text(kind == "push"
-                 ? "会把手机上当前的全部事件和分类整体写入云端，云端多出来的记录会被删除。其他设备下次同步后会变成手机上这份数据；如果云端有你手机上没同步下来的旧记录，那些记录会消失。此操作不可撤销，也不会进回收站。"
-                 : "会把云端的全部事件和分类整体写回手机，手机上多出来的记录会被移除。手机上没同步到云端的修改会消失。此操作不可撤销，也不会进回收站。")
-                .font(.system(size: 12)).foregroundColor(Theme.accent)
-            HStack(spacing: 8) {
+                .font(.system(size: 17, weight: .bold))
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+
+            VStack(alignment: .leading, spacing: 8) {
+                if kind == "push" {
+                    Text("会把手机上当前的全部事件和分类整体写入云端，云端多出来的记录会被删除。")
+                    Text("其他设备下次同步后会变成手机上这份数据；如果云端有你手机上没同步下来的旧记录，那些记录会消失。")
+                } else {
+                    Text("会把云端的全部数据整体写入手机，手机上多出来的事件会被删除。")
+                    Text("如果云端是空的或还没配置好，手机上所有事件都会被清空。执行前请先导出一份本地备份。")
+                }
+                Text("此操作不可撤销，也不会进回收站。").fontWeight(.semibold)
+            }
+            .font(.system(size: 13))
+            .foregroundColor(Theme.accent)
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(hex: "#faece8"))
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+
+            HStack(spacing: 10) {
                 PrimaryButton(title: "取消") { confirm = nil }
                 PrimaryButton(title: "确认覆盖", danger: true) {
                     let k = confirm; confirm = nil
@@ -182,7 +207,10 @@ struct SettingsView: View {
                 }
             }
         }
-        .padding(14).background(Color(hex: "#faece8")).clipShape(RoundedRectangle(cornerRadius: 14))
+        .padding(18)
+        .background(Color(uiColor: .systemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: .black.opacity(0.18), radius: 20, y: 8)
     }
 
     private var aiTab: some View {
