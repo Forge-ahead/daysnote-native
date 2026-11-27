@@ -77,9 +77,9 @@ private struct WidgetTemplate: Identifiable, Equatable {
                           brand: "#4a4844", rowBg: "#ffffff", hot: "#4a90d9", far: "#f0a04b",
                           chipOn: "#4a4844", chipOnInk: "#ffffff")),
         // ===== 大 4×4 =====
-        // 图2：倒计时面板（粉底 2×2 四大卡）
-        .init(id: "grid-rose", name: "倒计时面板", category: "大", kind: "grid", size: "large", slots: 4,
-              desc: "图2同款：4×4 粉底，2×2 四大卡，emoji + 标题 + 日期 + 大数字",
+        // 图2：倒计时面板（粉底 2×2 四大卡，实际是 4×2 中号）
+        .init(id: "grid-rose", name: "倒计时面板", category: "中", kind: "grid", size: "medium", slots: 4,
+              desc: "图2同款：4×2 中号粉底，2×2 四大卡，emoji + 标题 + 日期 + 大数字",
               skin: .init(bg: "#fbedef", bgAccent: "#f7dfe3", ink: "#a05a68", inkSoft: "#c2949e",
                           brand: "#b46876", rowBg: "#f8d7de", hot: "#d98a99", far: "#c9818e",
                           chipOn: "#b46876", chipOnInk: "#ffffff")),
@@ -261,12 +261,9 @@ private struct HolidayPanel: View {
                         .font(.system(size: mini ? 8 : 12, weight: .bold)).foregroundColor(wc(t.skin.brand))
                     if let h = holiday {
                         HStack(alignment: .firstTextBaseline, spacing: 2) {
-                            if h.inProgress {
-                                Text("进行中").font(.system(size: mini ? 11 : 24, weight: .bold)).foregroundColor(wc(t.skin.brand))
-                            } else {
-                                Text("\(h.daysLeft)").font(.system(size: mini ? 20 : 42, weight: .bold)).foregroundColor(wc(t.skin.brand))
-                                Text("天").font(.system(size: mini ? 7 : 12)).foregroundColor(wc(t.skin.brand))
-                            }
+                            // 假期中显示整个假期天数，不再只显示剩余 1 天
+                            Text("\(h.inProgress ? h.holidayDays : h.daysLeft)").font(.system(size: mini ? 20 : 42, weight: .bold)).foregroundColor(wc(t.skin.brand))
+                            Text("天").font(.system(size: mini ? 7 : 12)).foregroundColor(wc(t.skin.brand))
                         }
                         HStack(spacing: 3) {
                             Text("休").font(.system(size: mini ? 6 : 9, weight: .bold))
@@ -369,25 +366,38 @@ private struct SimplePanel: View {
     let withTian: Bool
 
     var body: some View {
-        VStack(spacing: mini ? 3 : 5) {
+        VStack(spacing: mini ? 4 : 6) {
             ForEach(0..<min(3, evs.count), id: \.self) { i in
                 let e = evs[i]
+                let base = i < 2 ? wc(t.skin.hot) : wc(t.skin.far)
+                let deep = i < 2 ? Color(hex: "#3579c4") : Color(hex: "#d98a2f")
                 HStack(spacing: 4) {
-                    Text("\(e.title) \(e.icon)").font(.system(size: mini ? 9 : 13, weight: .semibold)).foregroundColor(wc(t.skin.ink)).lineLimit(1)
-                    Spacer(minLength: 2)
-                    HStack(spacing: 1) {
-                        Text(daysText(e.days)).font(.system(size: mini ? 13 : 19, weight: .bold)).foregroundColor(.white)
-                        if withTian { Text("天").font(.system(size: mini ? 6 : 9)).foregroundColor(.white.opacity(0.9)) }
+                    HStack(spacing: 2) {
+                        Text(e.title).font(.system(size: mini ? 10 : 15, weight: .semibold)).foregroundColor(wc(t.skin.ink)).lineLimit(1)
+                        if !e.icon.isEmpty { Text(e.icon).font(.system(size: mini ? 9 : 14)) }
                     }
-                    .padding(.horizontal, mini ? 5 : 9).padding(.vertical, mini ? 1 : 3)
-                    .background(i < 2 ? wc(t.skin.hot) : wc(t.skin.far)).clipShape(RoundedRectangle(cornerRadius: 7))
+                    Spacer(minLength: 2)
+                    // 数字块贴右缘：纯数字款（图3左）无「天」格；带天款（图3右）数字+天分色格
+                    HStack(spacing: 0) {
+                        Text(daysText(e.days)).font(.system(size: mini ? 14 : 20, weight: .bold)).foregroundColor(.white)
+                            .frame(minWidth: mini ? 34 : 52, alignment: .center)
+                            .padding(.vertical, mini ? 2 : 5)
+                            .background(base)
+                        if withTian {
+                            Text("天").font(.system(size: mini ? 8 : 12, weight: .medium)).foregroundColor(.white)
+                                .frame(width: mini ? 20 : 32, alignment: .center)
+                                .padding(.vertical, mini ? 2 : 5)
+                                .background(deep)
+                        }
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: mini ? 6 : 7))
                 }
-                .padding(.horizontal, mini ? 5 : 10).frame(height: mini ? 24 : 38)
-                .background(wc(t.skin.rowBg)).clipShape(RoundedRectangle(cornerRadius: 9))
+                .padding(.horizontal, mini ? 6 : 10).frame(height: mini ? 28 : 42)
+                .background(wc(t.skin.rowBg)).clipShape(RoundedRectangle(cornerRadius: mini ? 8 : 9))
             }
             Spacer(minLength: 0)
         }
-        .padding(mini ? 4 : 8)
+        .padding(mini ? 5 : 9)
     }
 }
 
