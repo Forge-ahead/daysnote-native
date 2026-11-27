@@ -14,8 +14,15 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
-      - name: List schemes
-        run: xcodebuild -list -project DaysNote.xcodeproj
+      - name: Install xcodegen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: |
+          set -euo pipefail
+          rm -rf DaysNote.xcodeproj
+          xcodegen generate --spec project.yml
+          xcodebuild -list -project DaysNote.xcodeproj
 
       - name: Archive (unsigned, device slice)
         run: |
