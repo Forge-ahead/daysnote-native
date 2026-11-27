@@ -170,8 +170,7 @@ private struct PictureTealLargeView: View {
             VStack(spacing: spacing) {
                 Text(todayTitle()).font(.system(size: g.size.height * 0.072, weight: .medium)).foregroundColor(.white)
                     .frame(height: headerH)
-                ForEach(0..<evs.count, id: \.self) { i in
-                    let ev = evs[i]
+                ForEach(Array(evs.enumerated()), id: \.element.id) { i, ev in
                     HStack(spacing: 6) {
                         Text(ev.title).font(.system(size: rowH * 0.34)).foregroundColor(Color(hexW: "#3a3835")).lineLimit(1)
                         if !ev.icon.isEmpty { Text(ev.icon).font(.system(size: rowH * 0.30)) }
@@ -219,8 +218,7 @@ private struct ListBlueheadLargeView: View {
                 Text(todayTitle()).font(.system(size: g.size.height * 0.062, weight: .semibold)).foregroundColor(.white)
                     .frame(maxWidth: .infinity).frame(height: headerH)
                     .background(Color(hexW: "#3b82d6")).clipShape(RoundedRectangle(cornerRadius: 8))
-                ForEach(0..<evs.count, id: \.self) { i in
-                    let ev = evs[i]
+                ForEach(Array(evs.enumerated()), id: \.element.id) { i, ev in
                     HStack(spacing: 6) {
                         HStack(spacing: 3) {
                             Text(ev.title).font(.system(size: rowH * 0.32, weight: .semibold)).foregroundColor(Color(hexW: "#4a4844")).lineLimit(1)
@@ -334,8 +332,7 @@ private struct SimpleListView: View {
             let rowH = (g.size.height - pad * 2 - spacing * CGFloat(n - 1)) / CGFloat(n)
             let blockH = rowH * (medium ? 0.62 : 0.66)
             VStack(spacing: spacing) {
-                ForEach(0..<evs.count, id: \.self) { i in
-                    let ev = evs[i]
+                ForEach(Array(evs.enumerated()), id: \.element.id) { i, ev in
                     let base = i < 2 ? Color(hexW: "#4a90d9") : Color(hexW: "#f0a04b")
                     let deep = i < 2 ? Color(hexW: "#3579c4") : Color(hexW: "#d98a2f")
                     HStack(spacing: 4) {
