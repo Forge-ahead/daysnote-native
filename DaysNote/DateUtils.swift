@@ -124,26 +124,45 @@ enum LunarCalendar {
         return (p.leap ? "闰" : "") + monthName + "月" + dayName
     }
 
+    /// 公历年 → 系统农历的 (era, year)。
+    /// 注意：Chinese Calendar 的 .year 是六十甲子纪年里的序号，不是公历年。
+    /// 直接把 2026 塞进 .year 会得到约 4009 年，时间轴就会出现几十万天。
+    private static func chineseEraYear(forGregorianYear year: Int) -> (era: Int?, year: Int?) {
+        var g = Calendar(identifier: .gregorian)
+        g.timeZone = .current
+        // 7 月 1 日一定已过春节，落在对应农历年内
+        let anchor = g.date(from: DateComponents(year: year, month: 7, day: 1)) ?? Date()
+        let p = chineseCalendar.dateComponents([.era, .year], from: anchor)
+        return (p.era, p.year)
+    }
+
     /// 农历日期每年下一次对应的公历日期
     static func nextLunarOccurrence(date base: Date, from now: Date) -> Date? {
         let p = lunarParts(base)
         let c = chineseCalendar
-        var year = c.component(.year, from: now)
-        for _ in 0..<3 {
+        var g = Calendar(identifier: .gregorian); g.timeZone = .current
+        var gregorianYear = g.component(.year, from: now)
+        for _ in 0..<4 {
+            let ey = chineseEraYear(forGregorianYear: gregorianYear)
             var comps = DateComponents()
-            comps.year = year
+            comps.era = ey.era
+            comps.year = ey.year
             comps.month = p.leap ? -p.month : p.month
             comps.day = p.day
             if let d = c.date(from: comps), d >= now { return d }
-            year += 1
+            gregorianYear += 1
         }
         return nil
     }
 
     static func solarFromLunar(year: Int, month: Int, day: Int, leap: Bool = false) -> Date? {
-        var c = chineseCalendar
+        let c = chineseCalendar
+        let ey = chineseEraYear(forGregorianYear: year)
         var comps = DateComponents()
-        comps.year = year; comps.month = leap ? -month : month; comps.day = day
+        comps.era = ey.era
+        comps.year = ey.year
+        comps.month = leap ? -month : month
+        comps.day = day
         return c.date(from: comps)
     }
 }
