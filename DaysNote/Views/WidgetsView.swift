@@ -49,35 +49,37 @@ private struct WidgetTemplate: Identifiable, Equatable {
 
     static let all: [WidgetTemplate] = [
         .init(id: "holiday-official", name: "假日 · 法定节假日", category: "中", kind: "holiday", size: "medium", slots: 4,
-              holiday: true, skin: .init(bg: "#fbfaf7", bgAccent: "#f2f0ea", ink: "#3a3835", inkSoft: "#a6a29a",
-                                         brand: "#4a4844", rowBg: "#ffffff", hot: "#5b9bd5", far: "#e79a45",
-                                         chipOn: "#4a4844", chipOnInk: "#ffffff"),
-              desc: "左侧显示距离下一个法定节假日还剩几天 + 「休」+ 放假区间（每月联网更新国务院安排）；右侧显示指定分类的事件，按临近日期排序"),
+              desc: "左侧显示距离下一个法定节假日还剩几天 + 「休」+ 放假区间（每月联网更新国务院安排）；右侧显示指定分类的事件，按临近日期排序",
+              holiday: true,
+              skin: .init(bg: "#fbfaf7", bgAccent: "#f2f0ea", ink: "#3a3835", inkSoft: "#a6a29a",
+                          brand: "#4a4844", rowBg: "#ffffff", hot: "#5b9bd5", far: "#e79a45",
+                          chipOn: "#4a4844", chipOnInk: "#ffffff")),
         .init(id: "holiday-fresh", name: "假日 · 清新绿", category: "中", kind: "holiday", size: "medium", slots: 4,
-              holiday: true, skin: .init(bg: "#eef0e6", bgAccent: "#e3e8d8", ink: "#4a6141", inkSoft: "#93a488",
-                                         brand: "#5c8a4a", rowBg: "#ffffff", hot: "#5b9bd5", far: "#e79a45",
-                                         chipOn: "#6f9a5d", chipOnInk: "#ffffff"),
-              desc: "同上假日组件的清新绿皮肤，左侧法定节假日 + 右侧分类事件"),
+              desc: "同上假日组件的清新绿皮肤，左侧法定节假日 + 右侧分类事件",
+              holiday: true,
+              skin: .init(bg: "#eef0e6", bgAccent: "#e3e8d8", ink: "#4a6141", inkSoft: "#93a488",
+                          brand: "#5c8a4a", rowBg: "#ffffff", hot: "#5b9bd5", far: "#e79a45",
+                          chipOn: "#6f9a5d", chipOnInk: "#ffffff")),
         .init(id: "grid-rose", name: "四宫格面板 · 柔粉", category: "中", kind: "grid", size: "medium", slots: 4,
+              desc: "图4同款：2×2 卡片，emoji + 标题 + 日期 + 大数字",
               skin: .init(bg: "#fbedef", bgAccent: "#f7dfe3", ink: "#a05a68", inkSoft: "#c2949e",
                           brand: "#b46876", rowBg: "#f8d7de", hot: "#d98a99", far: "#c9818e",
-                          chipOn: "#b46876", chipOnInk: "#ffffff"),
-              desc: "图4同款：2×2 卡片，emoji + 标题 + 日期 + 大数字"),
+                          chipOn: "#b46876", chipOnInk: "#ffffff")),
         .init(id: "simple-day", name: "简约列表 · 带“天”", category: "小", kind: "simple", size: "small", slots: 3,
+              desc: "图3右同款：2×2 紧凑三行，数字与「天」分格显示",
               skin: .init(bg: "#f2f2f0", bgAccent: "#ffffff", ink: "#4a4844", inkSoft: "#a6a29a",
                           brand: "#4a4844", rowBg: "#ffffff", hot: "#4a90d9", far: "#f0a04b",
-                          chipOn: "#4a4844", chipOnInk: "#ffffff"),
-              desc: "图3右同款：2×2 紧凑三行，数字与「天」分格显示"),
+                          chipOn: "#4a4844", chipOnInk: "#ffffff")),
         .init(id: "picture-teal", name: "图文列表 · 青绿", category: "大", kind: "picture", size: "large", slots: 5,
+              desc: "图5上同款：青绿背景 + 顶部日期 + 5 行半透明卡片",
               skin: .init(bg: "#5c9e96", bgAccent: "#6aaba2", ink: "#ffffff", inkSoft: "#cfe6e1",
                           brand: "#ffffff", rowBg: "rgba(255,255,255,.20)", hot: "#4a90d9", far: "#f0a04b",
-                          chipOn: "#ffffff", chipOnInk: "#5c9e96"),
-              desc: "图5上同款：青绿背景 + 顶部日期 + 5 行半透明卡片"),
+                          chipOn: "#ffffff", chipOnInk: "#5c9e96")),
         .init(id: "list-bluehead", name: "简约列表 · 大号", category: "大", kind: "listLarge", size: "large", slots: 5,
+              desc: "图5下同款：白底蓝头 + 5 行色块数字",
               skin: .init(bg: "#ffffff", bgAccent: "#3b82d6", ink: "#4a4844", inkSoft: "#a6a29a",
                           brand: "#4a4844", rowBg: "#f5f6f8", hot: "#4a90d9", far: "#f0a04b",
-                          chipOn: "#3b82d6", chipOnInk: "#ffffff"),
-              desc: "图5下同款：白底蓝头 + 5 行色块数字"),
+                          chipOn: "#3b82d6", chipOnInk: "#ffffff")),
     ]
 }
 
@@ -94,7 +96,7 @@ private func shortDate(_ iso: String) -> String {
 }
 private func daysText(_ n: Int) -> String { n > 365 ? String(format: "%.2f年", Double(n) / 365.0) : "\(n)" }
 
-private func pickWidgetEvents(_ t: WidgetTemplate, store: Store) -> [EventItem] {
+@MainActor private func pickWidgetEvents(_ t: WidgetTemplate, store: Store) -> [EventItem] {
     let b = store.bindings[t.id] ?? .empty
     var picked: [EventItem]
     if b.mode == "events" && !b.eventIds.isEmpty {
@@ -128,7 +130,7 @@ private func demoBoundEvents(_ count: Int) -> [BoundEvent] {
     }
 }
 
-private func boundWidgetEvents(_ t: WidgetTemplate, store: Store) -> [BoundEvent] {
+@MainActor private func boundWidgetEvents(_ t: WidgetTemplate, store: Store) -> [BoundEvent] {
     let picked = pickWidgetEvents(t, store: store)
     if picked.isEmpty { return demoBoundEvents(t.slots) }
     let now = DateUtils.startOfToday()
@@ -478,8 +480,8 @@ private struct WidgetModal: View {
     let t: WidgetTemplate
     @State private var setting = false
 
-    private var binding: WidgetBinding { store.bindings[t.id] ?? .empty }
-    private var count: Int { pickWidgetEvents(t, store: store).count }
+    @MainActor private var binding: WidgetBinding { store.bindings[t.id] ?? .empty }
+    @MainActor private var count: Int { pickWidgetEvents(t, store: store).count }
 
     var body: some View {
         VStack(spacing: 0) {
