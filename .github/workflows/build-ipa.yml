@@ -58,14 +58,19 @@ jobs:
           mkdir -p "$PWD/.ipa-stage/Payload"
           cp -R "$APP" "$PWD/.ipa-stage/Payload/DaysNote.app"
           rm -f "$PWD/.ipa-stage/Payload/DaysNote.app/embedded.mobileprovision"
-          # 关键：用 ldid 给主 App 与 Widget 扩展伪签名并嵌入 entitlements。
-          # 完全无签名的 appex 会被 iOS 拒绝加载（表现为桌面小组件全部无法加载）。
-          ldid -SDaysNote/DaysNote.entitlements "$PWD/.ipa-stage/Payload/DaysNote.app/DaysNote"
-          ldid -SDaysNoteWidget/DaysNoteWidget.entitlements \
+          # 关键：用 codesign ad-hoc 签名并嵌入 entitlements。
+          # （ldid 在 macOS runner 上对新 ld 产物嵌入 entitlements 会静默失败，已弃用）
+          codesign --force --sign - --generate-entitlement-der \
+            --entitlements DaysNote/DaysNote.entitlements \
+            "$PWD/.ipa-stage/Payload/DaysNote.app/DaysNote"
+          codesign --force --sign - --generate-entitlement-der \
+            --entitlements DaysNoteWidget/DaysNoteWidget.entitlements \
             "$PWD/.ipa-stage/Payload/DaysNote.app/PlugIns/DaysNoteWidget.appex/DaysNoteWidget"
           # 校验：entitlements 必须真正嵌入，否则小组件在系统中无法加载
-          ldid -e "$PWD/.ipa-stage/Payload/DaysNote.app/DaysNote" | grep -q application-groups || { echo "APP entitlements MISSING"; exit 1; }
-          ldid -e "$PWD/.ipa-stage/Payload/DaysNote.app/PlugIns/DaysNoteWidget.appex/DaysNoteWidget" | grep -q application-groups || { echo "WIDGET entitlements MISSING"; exit 1; }
+          codesign -d --entitlements :- \
+            "$PWD/.ipa-stage/Payload/DaysNote.app/DaysNote" 2>/dev/null | grep -q application-groups || { echo "APP entitlements MISSING"; exit 1; }
+          codesign -d --entitlements :- \
+            "$PWD/.ipa-stage/Payload/DaysNote.app/PlugIns/DaysNoteWidget.appex/DaysNoteWidget" 2>/dev/null | grep -q application-groups || { echo "WIDGET entitlements MISSING"; exit 1; }
           echo "entitlements embedded OK"
           (cd "$PWD/.ipa-stage" && zip -qry "$PWD/DaysNote-native-unsigned.ipa" Payload)
           # zip 可能把绝对路径重建为嵌套目录，规整到根
