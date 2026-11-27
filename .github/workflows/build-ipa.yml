@@ -58,14 +58,15 @@ jobs:
           mkdir -p "$PWD/.ipa-stage/Payload"
           cp -R "$APP" "$PWD/.ipa-stage/Payload/DaysNote.app"
           rm -f "$PWD/.ipa-stage/Payload/DaysNote.app/embedded.mobileprovision"
-          # 关键：用 codesign ad-hoc 签名并嵌入 entitlements。
-          # （ldid 在 macOS runner 上对新 ld 产物嵌入 entitlements 会静默失败，已弃用）
+          # 关键：先移除 ld 的链接器签名，再用 codesign ad-hoc 重签并嵌入 entitlements。
+          APPBIN="$PWD/.ipa-stage/Payload/DaysNote.app/DaysNote"
+          WGBIN="$PWD/.ipa-stage/Payload/DaysNote.app/PlugIns/DaysNoteWidget.appex/DaysNoteWidget"
+          codesign --remove-signature "$APPBIN" || true
+          codesign --remove-signature "$WGBIN" || true
           codesign --force --sign - --generate-entitlement-der \
-            --entitlements DaysNote/DaysNote.entitlements \
-            "$PWD/.ipa-stage/Payload/DaysNote.app/DaysNote"
+            --entitlements DaysNote/DaysNote.entitlements "$APPBIN"
           codesign --force --sign - --generate-entitlement-der \
-            --entitlements DaysNoteWidget/DaysNoteWidget.entitlements \
-            "$PWD/.ipa-stage/Payload/DaysNote.app/PlugIns/DaysNoteWidget.appex/DaysNoteWidget"
+            --entitlements DaysNoteWidget/DaysNoteWidget.entitlements "$WGBIN"
           # 校验：entitlements 必须真正嵌入（DER 或 XML 槽位均算），否则小组件无法加载
           APPBIN="$PWD/.ipa-stage/Payload/DaysNote.app/DaysNote"
           WGBIN="$PWD/.ipa-stage/Payload/DaysNote.app/PlugIns/DaysNoteWidget.appex/DaysNoteWidget"
