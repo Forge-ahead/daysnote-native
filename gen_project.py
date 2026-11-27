@@ -185,7 +185,7 @@ def pbproj():
         ('CLANG_ENABLE_OBJC_ARC','YES'),('COPY_PHASE_STRIP','NO'),
         ('ENABLE_STRICT_OBJC_MSGSEND','YES'),('GCC_C_LANGUAGE_STANDARD','gnu17'),
         ('IPHONEOS_DEPLOYMENT_TARGET','17.0'),('SDKROOT','iphoneos'),
-        ('SWIFT_VERSION','5.0'),('TARGETED_DEVICE_FAMILY','1,2'),
+        ('SWIFT_VERSION','5.0'),('TARGETED_DEVICE_FAMILY','( 1, 2 )'),
         ('MARKETING_VERSION','3.0.0'),('CURRENT_PROJECT_VERSION','31'),
     ]
     debug = common + [
