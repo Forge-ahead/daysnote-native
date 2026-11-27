@@ -28,10 +28,9 @@ jobs:
 
       - name: Static dump of widget appex
         run: |
-          set -euo pipefail
-          APPLEX="$PWD/.simbuild/Build/Products/Debug-iphonesimulator/DaysNoteWidget.appex"
-          echo "APPEX = $APPEX"
-          ls -la "$APPEX" || exit 1
+          set -eo pipefail
+          APPEX="$PWD/.simbuild/Build/Products/Debug-iphonesimulator/DaysNoteWidget.appex"
+          ls -la "$APPEX"
           echo "===== appex Info.plist ====="
           plutil -p "$APPEX/Info.plist"
           echo "===== ldid sign + entitlements self-check ====="
@@ -40,19 +39,19 @@ jobs:
 
       - name: Boot simulator
         run: |
-          set -euo pipefail
-          DEVICE=$(xcrun simctl list devices available | grep -m1 'iPhone' | sed -E 's/.*\(([A-F0-9-]{36})\).*/\1/')
-          echo "DEVICE=$DEVICE" | tee device.env
+          set -eo pipefail
+          DEVICE=`xcrun simctl list devices available | grep -m1 'iPhone' | sed -E 's/.*\(([A-F0-9-]{36})\).*/\1/'`
+          echo "DEVICE=$DEVICE"
           xcrun simctl boot "$DEVICE" || true
           xcrun simctl bootstatus "$DEVICE" -b
+          echo "$DEVICE" > device.env
 
       - name: Install app and register widgets
         run: |
-          set -euo pipefail
-          DEVICE=$(cut -d= -f2 device.env)
+          set -eo pipefail
+          DEVICE=`cat device.env`
           APP="$PWD/.simbuild/Build/Products/Debug-iphonesimulator/DaysNote.app"
-          echo "APP = $APP"
-          ls "$APP" >/dev/null || exit 1
+          ls "$APP"
           xcrun simctl install "$DEVICE" "$APP"
           xcrun simctl launch "$DEVICE" com.daysnote.app || true
           sleep 20
@@ -61,12 +60,10 @@ jobs:
 
       - name: Trigger widget timeline and capture logs
         run: |
-          set -euo pipefail
-          DEVICE=$(cut -d= -f2 device.env)
+          set -eo pipefail
+          DEVICE=`cat device.env`
           xcrun simctl spawn "$DEVICE" log collect --output /tmp/wk.logarchive || true
-          xcrun simctl spawn "$DEVICE" log show --archive /tmp/wk.logarchive --last 5m \
-            --predicate 'process CONTAINS[c] "widget" OR process CONTAINS[c] "daysnote"' \
-            2>/dev/null | tail -200 > widget-log.txt || true
+          xcrun simctl spawn "$DEVICE" log show --archive /tmp/wk.logarchive --last 5m --predicate 'process CONTAINS[c] "widget" OR process CONTAINS[c] "daysnote"' > widget-log.txt || true
           wc -l widget-log.txt
           grep -iE "error|fail|crash|invalid|reject|denied|daysnote" widget-log.txt | head -80 || echo "no error lines"
 
