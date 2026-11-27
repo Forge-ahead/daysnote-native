@@ -93,7 +93,13 @@ struct WidgetRoot<Content: View>: View {
     @Environment(\.widgetFamily) var family
     let content: Content
     init(@ViewBuilder content: () -> Content) { self.content = content() }
-    var body: some View { content.containerBackground(.clear, for: .widget) }
+    var body: some View {
+        if #available(iOS 17.0, *) {
+            content.containerBackground(.clear, for: .widget)
+        } else {
+            content
+        }
+    }
 }
 
 func daysText(_ e: WidgetEvent) -> String { e.days > 365 ? String(format: "%.2f年", Double(e.days) / 365) : "\(e.days)" }
