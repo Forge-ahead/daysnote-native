@@ -20,7 +20,7 @@ struct RootView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            Theme.background(store.settings.backgroundStyle).ignoresSafeArea()
+            GridBackground(style: store.settings.backgroundStyle).ignoresSafeArea()
 
             Group {
                 switch view {
@@ -85,7 +85,10 @@ struct RootView: View {
                 }
             }
         }
-        .onAppear { if store.settings.autoSync { Task { await store.doSync() } } }
+        .onAppear {
+            if store.settings.autoSync { Task { await store.doSync() } }
+            store.autoBackupIfNeeded()
+        }
         .preferredColorScheme(colorScheme)
     }
 
