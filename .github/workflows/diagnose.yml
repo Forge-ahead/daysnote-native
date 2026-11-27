@@ -1,0 +1,57 @@
+name: Diagnose crash on simulator
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diagnose:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install xcodegen
+        run: brew install xcodegen
+
+      - name: Generate project
+        run: xcodegen generate --spec project.yml
+
+      - name: Build for simulator
+        run: |
+          set -euo pipefail
+          xcodebuild -project DaysNote.xcodeproj \
+            -scheme DaysNote \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -derivedDataPath "$PWD/.simbuild" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: Boot simulator and launch app
+        run: |
+          set -euo pipefail
+          DEVICE=$(xcrun simctl list devices available | grep -E 'iPhone' | head -1 | sed -E 's/.*\(([A-F0-9-]+)\).*/\1/')
+          echo "DEVICE=$DEVICE"
+          xcrun simctl boot "$DEVICE" || true
+          xcrun simctl bootstatus "$DEVICE" -b
+          APP=$(find "$PWD/.simbuild" -type d -name 'DaysNote.app' | head -1)
+          echo "APP=$APP"
+          xcrun simctl install "$DEVICE" "$APP"
+          # 捕获启动日志
+          xcrun simctl launch "$DEVICE" com.daysnote.app > "$PWD/launch.out" 2>&1 || true
+          sleep 6
+          echo "=== launch.out ==="
+          cat "$PWD/launch.out"
+          echo "=== app logs ==="
+          xcrun simctl spawn "$DEVICE" log show --last 2m --predicate 'process == "DaysNote"' 2>/dev/null | tail -200 || true
+          echo "=== crash reports ==="
+          find ~/Library/Logs/DiagnosticReports -iname 'DaysNote*' -newermt '-5 minutes' -exec sh -c 'echo "--- $1 ---"; cat "$1"' _ {} \; 2>/dev/null | head -400 || true
+
+      - name: Upload diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: crash-diagnostics
+          path: |
+            launch.out
+          if-no-files-found: ignore
