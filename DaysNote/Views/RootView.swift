@@ -86,7 +86,7 @@ struct RootView: View {
             }
         }
         .onAppear {
-            if store.settings.autoSync { Task { await store.doSync() } }
+            if store.settings.autoSync { Task { await store.doSync(silentIfUnconfigured: true) } }
             store.autoBackupIfNeeded()
         }
         .preferredColorScheme(colorScheme)
