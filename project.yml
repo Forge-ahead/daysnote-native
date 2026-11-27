@@ -55,6 +55,9 @@ targets:
       properties:
         CFBundleShortVersionString: "3.0.0"
         CFBundleVersion: "31"
+        MinimumOSVersion: "15.0"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
     entitlements:
       path: DaysNoteWidget/DaysNoteWidget.entitlements
     settings:
