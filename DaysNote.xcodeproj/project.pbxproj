@@ -5,150 +5,150 @@
 	};
 	objectVersion = 56;
 	objects = {
-		67E18B01F10E4774A389A118 /* Project object */ = {
+		6AC81C33BAB14ACEAB1808BD /* Project object */ = {
 			isa = PBXProject;
 			attributes = { BuildIndependentTargetsInParallel = 1; LastUpgradeCheck = 1600; };
-			buildConfigurationList = C113DAE915204384BE08C0D7 /* Build configuration list for PBXProject */;
+			buildConfigurationList = EFFF1889281145D6B80758F7 /* Build configuration list for PBXProject */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = ( en, Base, "zh-Hans" );
-			mainGroup = 8E6C2B332E0D4935A8F9C70A;
-			productRefGroup = A4CE918D4FF04F8C969F9AB0;
+			mainGroup = D9BD94A12B6A4728B19161C1;
+			productRefGroup = 91E0D899F13E4FFF9C88664A;
 			projectDirPath = "";
 			projectRoot = "";
-			targets = ( F3D168267B364132B501FE24 /* DaysNote */, 52A7A0BE5D944ABCA6D8E71D /* DaysNoteWidget */ );
+			targets = ( 1DC60EF956134FEDAC59E3B2 /* DaysNote */, 62734B4E7100470CA60DAE1F /* DaysNoteWidget */ );
 		};
-		8E6C2B332E0D4935A8F9C70A = { isa = PBXGroup; children = ( A42497B60ABA4C2F896D0935, 4B6C0D4BC7814D11B53A4F01, A4CE918D4FF04F8C969F9AB0 ); sourceTree = "<group>"; };
-		A42497B60ABA4C2F896D0935 = { isa = PBXGroup; children = ( 95F52E5991F3477FBB299E3A /* DaysNoteApp.swift */ 682226CEE82E4BB3B1885A10 /* Models.swift */ 54F1E3D3A7FA4B5F882FC34B /* DateUtils.swift */ 2CBBBDFC40904B169668D6EA /* SyncEngine.swift */ 319E62A29FC243BEBE897135 /* Store.swift */ F4EE168CDD454BA091A9061D /* HolidayService.swift */ 87C1AED2B6584E19A22E2A76 /* AIService.swift */, 209B15F523E040B8974825E3 /* Views */, 58DD14A3E2FE4279BB6C38CE /* Info.plist */, 7C6BE1679E7644CD938011FF /* DaysNote.entitlements */, 18D9318481334CCA8713D67B /* Assets.xcassets */ ); path = DaysNote; sourceTree = "<group>"; };
-		209B15F523E040B8974825E3 = { isa = PBXGroup; children = ( F02AE83DDF3B476A9A4D85A2 /* Common.swift */ 5C274E0063764D7489523A24 /* HomeView.swift */ 1720B55465BC40B488951213 /* TimelineView.swift */ 2BE0B0925E5C488D8C7323CB /* EventEditor.swift */ 28BBCF82A71F4D6895904406 /* EventDetail.swift */ B29BBA46B93A4BDABD1A5C92 /* CategoryViews.swift */ 055B037C6E8B42A98C5D645E /* Drawer.swift */ C8AE7F2D945846398B6DB048 /* TrashView.swift */ C3AFC59B7750443CBB166C73 /* SettingsView.swift */ 406EF8821C474A119FD2FD1B /* WidgetsView.swift */ 307D07660E7D4867B899573C /* RootView.swift */ ); path = Views; sourceTree = "<group>"; };
-		4B6C0D4BC7814D11B53A4F01 = { isa = PBXGroup; children = ( DB9176FEFE7E4018B1458870 /* DaysNoteWidget.swift */, 369E95D88F0443D085F612F9 /* Info.plist */, DCB7AD00BF634FEB9BBE80C2 /* DaysNoteWidget.entitlements */ ); path = DaysNoteWidget; sourceTree = "<group>"; };
-		A4CE918D4FF04F8C969F9AB0 = { isa = PBXGroup; children = ( 7E9103C53ABB42CB9141092C /* DaysNote.app */, 84CA846E94B44EB883176240 /* DaysNoteWidget.appex */ ); name = Products; sourceTree = "<group>"; };
-		95F52E5991F3477FBB299E3A /* DaysNoteApp.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DaysNoteApp.swift"; sourceTree = "<group>"; };
-		682226CEE82E4BB3B1885A10 /* Models.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models.swift"; sourceTree = "<group>"; };
-		54F1E3D3A7FA4B5F882FC34B /* DateUtils.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DateUtils.swift"; sourceTree = "<group>"; };
-		2CBBBDFC40904B169668D6EA /* SyncEngine.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SyncEngine.swift"; sourceTree = "<group>"; };
-		319E62A29FC243BEBE897135 /* Store.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Store.swift"; sourceTree = "<group>"; };
-		F4EE168CDD454BA091A9061D /* HolidayService.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HolidayService.swift"; sourceTree = "<group>"; };
-		87C1AED2B6584E19A22E2A76 /* AIService.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AIService.swift"; sourceTree = "<group>"; };
-		F02AE83DDF3B476A9A4D85A2 /* Common.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Common.swift"; sourceTree = "<group>"; };
-		5C274E0063764D7489523A24 /* HomeView.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HomeView.swift"; sourceTree = "<group>"; };
-		1720B55465BC40B488951213 /* TimelineView.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TimelineView.swift"; sourceTree = "<group>"; };
-		2BE0B0925E5C488D8C7323CB /* EventEditor.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EventEditor.swift"; sourceTree = "<group>"; };
-		28BBCF82A71F4D6895904406 /* EventDetail.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EventDetail.swift"; sourceTree = "<group>"; };
-		B29BBA46B93A4BDABD1A5C92 /* CategoryViews.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CategoryViews.swift"; sourceTree = "<group>"; };
-		055B037C6E8B42A98C5D645E /* Drawer.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Drawer.swift"; sourceTree = "<group>"; };
-		C8AE7F2D945846398B6DB048 /* TrashView.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TrashView.swift"; sourceTree = "<group>"; };
-		C3AFC59B7750443CBB166C73 /* SettingsView.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView.swift"; sourceTree = "<group>"; };
-		406EF8821C474A119FD2FD1B /* WidgetsView.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WidgetsView.swift"; sourceTree = "<group>"; };
-		307D07660E7D4867B899573C /* RootView.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RootView.swift"; sourceTree = "<group>"; };
-		DB9176FEFE7E4018B1458870 /* DaysNoteWidget.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DaysNoteWidget.swift"; sourceTree = "<group>"; };
-		58DD14A3E2FE4279BB6C38CE /* Info.plist */ = { isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		7C6BE1679E7644CD938011FF /* DaysNote.entitlements */ = { isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DaysNote.entitlements; sourceTree = "<group>"; };
-		369E95D88F0443D085F612F9 /* Info.plist */ = { isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		DCB7AD00BF634FEB9BBE80C2 /* DaysNoteWidget.entitlements */ = { isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DaysNoteWidget.entitlements; sourceTree = "<group>"; };
-		18D9318481334CCA8713D67B /* Assets.xcassets */ = { isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		7E9103C53ABB42CB9141092C /* DaysNote.app */ = { isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DaysNote.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		84CA846E94B44EB883176240 /* DaysNoteWidget.appex */ = { isa = PBXFileReference; explicitFileType = wrapper.app-extension; includeInIndex = 0; path = DaysNoteWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		906690C3D818441B86B9F33E /* DaysNoteApp.swift in Sources */ = { isa = PBXBuildFile; fileRef = 95F52E5991F3477FBB299E3A /* DaysNoteApp.swift */; };
-		28D3E837648B4838984E9281 /* Models.swift in Sources */ = { isa = PBXBuildFile; fileRef = 682226CEE82E4BB3B1885A10 /* Models.swift */; };
-		A70BFEA6B54144E0B2F68D58 /* DateUtils.swift in Sources */ = { isa = PBXBuildFile; fileRef = 54F1E3D3A7FA4B5F882FC34B /* DateUtils.swift */; };
-		C3A7C55881464CDDB7B1AE01 /* SyncEngine.swift in Sources */ = { isa = PBXBuildFile; fileRef = 2CBBBDFC40904B169668D6EA /* SyncEngine.swift */; };
-		8A6BB727D2B145FCAA8FD579 /* Store.swift in Sources */ = { isa = PBXBuildFile; fileRef = 319E62A29FC243BEBE897135 /* Store.swift */; };
-		2F52140905BC4BFA81F59BF6 /* HolidayService.swift in Sources */ = { isa = PBXBuildFile; fileRef = F4EE168CDD454BA091A9061D /* HolidayService.swift */; };
-		BCC70D8D4F0B474D8EADFBB6 /* AIService.swift in Sources */ = { isa = PBXBuildFile; fileRef = 87C1AED2B6584E19A22E2A76 /* AIService.swift */; };
-		802DCDCE4550421D89473AC3 /* Common.swift in Sources */ = { isa = PBXBuildFile; fileRef = F02AE83DDF3B476A9A4D85A2 /* Common.swift */; };
-		90949B123C494924A2EFAF4B /* HomeView.swift in Sources */ = { isa = PBXBuildFile; fileRef = 5C274E0063764D7489523A24 /* HomeView.swift */; };
-		AABC1223229747A4BFC83603 /* TimelineView.swift in Sources */ = { isa = PBXBuildFile; fileRef = 1720B55465BC40B488951213 /* TimelineView.swift */; };
-		9ADD263D6A2A48DFA7B45440 /* EventEditor.swift in Sources */ = { isa = PBXBuildFile; fileRef = 2BE0B0925E5C488D8C7323CB /* EventEditor.swift */; };
-		DF1F760F29B34E5B93E63B60 /* EventDetail.swift in Sources */ = { isa = PBXBuildFile; fileRef = 28BBCF82A71F4D6895904406 /* EventDetail.swift */; };
-		6CD379C571F540D79DBA9A9F /* CategoryViews.swift in Sources */ = { isa = PBXBuildFile; fileRef = B29BBA46B93A4BDABD1A5C92 /* CategoryViews.swift */; };
-		61F1B81E175442F2AEAED1CE /* Drawer.swift in Sources */ = { isa = PBXBuildFile; fileRef = 055B037C6E8B42A98C5D645E /* Drawer.swift */; };
-		82E454E7F9B54D0F87FA448C /* TrashView.swift in Sources */ = { isa = PBXBuildFile; fileRef = C8AE7F2D945846398B6DB048 /* TrashView.swift */; };
-		B5E8E1FCEEF94F8CBA7899B4 /* SettingsView.swift in Sources */ = { isa = PBXBuildFile; fileRef = C3AFC59B7750443CBB166C73 /* SettingsView.swift */; };
-		AC73DEDD4F504F0888BC4ECB /* WidgetsView.swift in Sources */ = { isa = PBXBuildFile; fileRef = 406EF8821C474A119FD2FD1B /* WidgetsView.swift */; };
-		EDF832C1840C40A7829E77E6 /* RootView.swift in Sources */ = { isa = PBXBuildFile; fileRef = 307D07660E7D4867B899573C /* RootView.swift */; };
-		C8746B3164134F8DA4D88118 /* DaysNoteWidget.swift in Sources */ = { isa = PBXBuildFile; fileRef = DB9176FEFE7E4018B1458870 /* DaysNoteWidget.swift */; };
-		9DC885D0CB7C4270970A2B7F /* Assets.xcassets in Resources */ = { isa = PBXBuildFile; fileRef = 18D9318481334CCA8713D67B /* Assets.xcassets */; };
-		F3D168267B364132B501FE24 /* DaysNote */ = {
+		D9BD94A12B6A4728B19161C1 = { isa = PBXGroup; children = ( B428827D8F75484C9BD69F08, 3FDAB10483864B35BF7D17E1, 91E0D899F13E4FFF9C88664A ); sourceTree = "<group>"; };
+		B428827D8F75484C9BD69F08 = { isa = PBXGroup; children = ( 01D736D4F7114E099B47120F /* DaysNoteApp.swift */, EE5E718C2FCA430689EE7281 /* Models.swift */, C23379C99BEF44E69565D390 /* DateUtils.swift */, C344EE17BC7148D4A3968962 /* SyncEngine.swift */, FBA69820F50B4102B73A13E3 /* Store.swift */, F0FD73D04B2A4C8C89B54803 /* HolidayService.swift */, 8E16B54EF98543EA99185D85 /* AIService.swift */, 2519858DB0B843BFAD642C7E /* Views */, 5D06F57199B44D90BF7BC43C /* Info.plist */, B3810D9DA87A48FBAE53D482 /* DaysNote.entitlements */, 60125B1B5F8D440BB92EB913 /* Assets.xcassets */ ); path = DaysNote; sourceTree = "<group>"; };
+		2519858DB0B843BFAD642C7E = { isa = PBXGroup; children = ( AF2B151C5BC543F28C045ED5 /* Common.swift */, CCE9AF22D69F4A50827EC9FA /* HomeView.swift */, 7B2F72EEB33B43A0B4FBC15B /* TimelineView.swift */, 0A6786CF1CC442909DD28331 /* EventEditor.swift */, DD19B1750A94430EA17404E7 /* EventDetail.swift */, E4F676DAA4904965A27E1442 /* CategoryViews.swift */, 8DF7FDD6D6CC4CD881CA48AA /* Drawer.swift */, 0032979E9ED543C58223DE4D /* TrashView.swift */, 8CB42AE492114E01BE779A9C /* SettingsView.swift */, 9E36844579A549A787F8841C /* WidgetsView.swift */, F6F45BFBEE9C4D2497E29BD7 /* RootView.swift */ ); path = Views; sourceTree = "<group>"; };
+		3FDAB10483864B35BF7D17E1 = { isa = PBXGroup; children = ( A9640116D1044130B3180807 /* DaysNoteWidget.swift */, 6DF67DF0F9064EFC845FC7F0 /* Info.plist */, 0CBE935DB2BB4B70AF1830A1 /* DaysNoteWidget.entitlements */ ); path = DaysNoteWidget; sourceTree = "<group>"; };
+		91E0D899F13E4FFF9C88664A = { isa = PBXGroup; children = ( F61047E706A3423E9CE4FB74 /* DaysNote.app */, 61958A11192A4E55A8C6EEF1 /* DaysNoteWidget.appex */ ); name = Products; sourceTree = "<group>"; };
+		01D736D4F7114E099B47120F /* DaysNoteApp.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DaysNoteApp.swift"; sourceTree = "<group>"; };
+		EE5E718C2FCA430689EE7281 /* Models.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models.swift"; sourceTree = "<group>"; };
+		C23379C99BEF44E69565D390 /* DateUtils.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DateUtils.swift"; sourceTree = "<group>"; };
+		C344EE17BC7148D4A3968962 /* SyncEngine.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SyncEngine.swift"; sourceTree = "<group>"; };
+		FBA69820F50B4102B73A13E3 /* Store.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Store.swift"; sourceTree = "<group>"; };
+		F0FD73D04B2A4C8C89B54803 /* HolidayService.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HolidayService.swift"; sourceTree = "<group>"; };
+		8E16B54EF98543EA99185D85 /* AIService.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AIService.swift"; sourceTree = "<group>"; };
+		AF2B151C5BC543F28C045ED5 /* Common.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Common.swift"; sourceTree = "<group>"; };
+		CCE9AF22D69F4A50827EC9FA /* HomeView.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HomeView.swift"; sourceTree = "<group>"; };
+		7B2F72EEB33B43A0B4FBC15B /* TimelineView.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TimelineView.swift"; sourceTree = "<group>"; };
+		0A6786CF1CC442909DD28331 /* EventEditor.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EventEditor.swift"; sourceTree = "<group>"; };
+		DD19B1750A94430EA17404E7 /* EventDetail.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EventDetail.swift"; sourceTree = "<group>"; };
+		E4F676DAA4904965A27E1442 /* CategoryViews.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CategoryViews.swift"; sourceTree = "<group>"; };
+		8DF7FDD6D6CC4CD881CA48AA /* Drawer.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Drawer.swift"; sourceTree = "<group>"; };
+		0032979E9ED543C58223DE4D /* TrashView.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TrashView.swift"; sourceTree = "<group>"; };
+		8CB42AE492114E01BE779A9C /* SettingsView.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView.swift"; sourceTree = "<group>"; };
+		9E36844579A549A787F8841C /* WidgetsView.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WidgetsView.swift"; sourceTree = "<group>"; };
+		F6F45BFBEE9C4D2497E29BD7 /* RootView.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RootView.swift"; sourceTree = "<group>"; };
+		A9640116D1044130B3180807 /* DaysNoteWidget.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DaysNoteWidget.swift"; sourceTree = "<group>"; };
+		5D06F57199B44D90BF7BC43C /* Info.plist */ = { isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B3810D9DA87A48FBAE53D482 /* DaysNote.entitlements */ = { isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DaysNote.entitlements; sourceTree = "<group>"; };
+		6DF67DF0F9064EFC845FC7F0 /* Info.plist */ = { isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0CBE935DB2BB4B70AF1830A1 /* DaysNoteWidget.entitlements */ = { isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DaysNoteWidget.entitlements; sourceTree = "<group>"; };
+		60125B1B5F8D440BB92EB913 /* Assets.xcassets */ = { isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F61047E706A3423E9CE4FB74 /* DaysNote.app */ = { isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DaysNote.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		61958A11192A4E55A8C6EEF1 /* DaysNoteWidget.appex */ = { isa = PBXFileReference; explicitFileType = wrapper.app-extension; includeInIndex = 0; path = DaysNoteWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		A4741FF84EF74A278A5FD640 /* DaysNoteApp.swift in Sources */ = { isa = PBXBuildFile; fileRef = 01D736D4F7114E099B47120F /* DaysNoteApp.swift */; };
+		F197EA9106654F7B8A65CB53 /* Models.swift in Sources */ = { isa = PBXBuildFile; fileRef = EE5E718C2FCA430689EE7281 /* Models.swift */; };
+		1FD04C2CE5C641A2BDD4F43D /* DateUtils.swift in Sources */ = { isa = PBXBuildFile; fileRef = C23379C99BEF44E69565D390 /* DateUtils.swift */; };
+		3CD2ACC871C14997BE881029 /* SyncEngine.swift in Sources */ = { isa = PBXBuildFile; fileRef = C344EE17BC7148D4A3968962 /* SyncEngine.swift */; };
+		B39E1D7380D646EA9F1A9BC4 /* Store.swift in Sources */ = { isa = PBXBuildFile; fileRef = FBA69820F50B4102B73A13E3 /* Store.swift */; };
+		B10589E6748B4556A46803DE /* HolidayService.swift in Sources */ = { isa = PBXBuildFile; fileRef = F0FD73D04B2A4C8C89B54803 /* HolidayService.swift */; };
+		FAC10E2F8BEF488691656B69 /* AIService.swift in Sources */ = { isa = PBXBuildFile; fileRef = 8E16B54EF98543EA99185D85 /* AIService.swift */; };
+		5CA6D2A42148481295612D3E /* Common.swift in Sources */ = { isa = PBXBuildFile; fileRef = AF2B151C5BC543F28C045ED5 /* Common.swift */; };
+		98DDA4F04C6746F9847D1D31 /* HomeView.swift in Sources */ = { isa = PBXBuildFile; fileRef = CCE9AF22D69F4A50827EC9FA /* HomeView.swift */; };
+		B6C80E4AD9DA4758B881FA6C /* TimelineView.swift in Sources */ = { isa = PBXBuildFile; fileRef = 7B2F72EEB33B43A0B4FBC15B /* TimelineView.swift */; };
+		E0D2385F41EF46E88C86AA35 /* EventEditor.swift in Sources */ = { isa = PBXBuildFile; fileRef = 0A6786CF1CC442909DD28331 /* EventEditor.swift */; };
+		3DABE8641633436ABBBEAA73 /* EventDetail.swift in Sources */ = { isa = PBXBuildFile; fileRef = DD19B1750A94430EA17404E7 /* EventDetail.swift */; };
+		CDF37EE55A3444E4AD82962A /* CategoryViews.swift in Sources */ = { isa = PBXBuildFile; fileRef = E4F676DAA4904965A27E1442 /* CategoryViews.swift */; };
+		31CCB0EE6C1B4871B7F56092 /* Drawer.swift in Sources */ = { isa = PBXBuildFile; fileRef = 8DF7FDD6D6CC4CD881CA48AA /* Drawer.swift */; };
+		9343B830EECD440BB2998BF4 /* TrashView.swift in Sources */ = { isa = PBXBuildFile; fileRef = 0032979E9ED543C58223DE4D /* TrashView.swift */; };
+		AE55E7836426442F97103CD9 /* SettingsView.swift in Sources */ = { isa = PBXBuildFile; fileRef = 8CB42AE492114E01BE779A9C /* SettingsView.swift */; };
+		BB92700D16274EC18FF27CFF /* WidgetsView.swift in Sources */ = { isa = PBXBuildFile; fileRef = 9E36844579A549A787F8841C /* WidgetsView.swift */; };
+		04B7202966B64F5FB8A6D63D /* RootView.swift in Sources */ = { isa = PBXBuildFile; fileRef = F6F45BFBEE9C4D2497E29BD7 /* RootView.swift */; };
+		08046FA94DF445608F02747B /* DaysNoteWidget.swift in Sources */ = { isa = PBXBuildFile; fileRef = A9640116D1044130B3180807 /* DaysNoteWidget.swift */; };
+		215F3B44D55D4EB38B5621EB /* Assets.xcassets in Resources */ = { isa = PBXBuildFile; fileRef = 60125B1B5F8D440BB92EB913 /* Assets.xcassets */; };
+		1DC60EF956134FEDAC59E3B2 /* DaysNote */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D88A2964C8EA45C0AF532A4A;
-			buildPhases = ( 1E9AB7FFB8744DADA5267310, F084A9E7B3AE4F63BC829CE3, C0DD01C24A444A02BA9A2D4D, 79FE279D2A7F481E8451AD9B );
+			buildConfigurationList = 5C938C94BB934133B0A928FD;
+			buildPhases = ( 97CFFF1460BF4598A8A6750D, E4EE04C641F344CC9E1B382E, 4733D2F718204EFB988938ED, 0D482DC0187B43B091820A17 );
 			buildRules = ( );
-			dependencies = ( C34FE222F41E47688D8F2F46 );
+			dependencies = ( E2398FF618C244F0B6F3BCB0 );
 			name = DaysNote;
 			productName = DaysNote;
-			productReference = 7E9103C53ABB42CB9141092C /* DaysNote.app */;
+			productReference = F61047E706A3423E9CE4FB74 /* DaysNote.app */;
 			productType = "com.apple.product-type.application";
 		};
-		52A7A0BE5D944ABCA6D8E71D /* DaysNoteWidget */ = {
+		62734B4E7100470CA60DAE1F /* DaysNoteWidget */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E1D170C56AD348EF85E5B7B7;
-			buildPhases = ( B1420E06E30F47CDB88576D6, FDD41AAD5BBC4B92A1E8236C, BC701BFD9F3A4845A0653AE0 );
+			buildConfigurationList = CEFBC53BE0EA488C9F45E253;
+			buildPhases = ( C1F95EB512F24D31A1ECFE2B, B143A3D9C92846519E951B63, A1A0B8383D334DE68015F6CC );
 			buildRules = ( );
 			dependencies = ( );
 			name = DaysNoteWidget;
 			productName = DaysNoteWidget;
-			productReference = 84CA846E94B44EB883176240 /* DaysNoteWidget.appex */;
+			productReference = 61958A11192A4E55A8C6EEF1 /* DaysNoteWidget.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		C34FE222F41E47688D8F2F46 /* PBXTargetDependency */ = {
+		E2398FF618C244F0B6F3BCB0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 52A7A0BE5D944ABCA6D8E71D /* DaysNoteWidget */;
-			targetProxy = F7F4882A7DF947B3BC4697A4 /* PBXContainerItemProxy */;
+			target = 62734B4E7100470CA60DAE1F /* DaysNoteWidget */;
+			targetProxy = C8C08BF9061D4BAB9DD58986 /* PBXContainerItemProxy */;
 		};
-		F7F4882A7DF947B3BC4697A4 /* PBXContainerItemProxy */ = {
+		C8C08BF9061D4BAB9DD58986 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 67E18B01F10E4774A389A118 /* Project object */;
+			containerPortal = 6AC81C33BAB14ACEAB1808BD /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 52A7A0BE5D944ABCA6D8E71D;
+			remoteGlobalIDString = 62734B4E7100470CA60DAE1F;
 			remoteInfo = DaysNoteWidget;
 		};
-		1E9AB7FFB8744DADA5267310 /* Sources */ = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = ( 906690C3D818441B86B9F33E /* DaysNoteApp.swift in Sources */ 28D3E837648B4838984E9281 /* Models.swift in Sources */ A70BFEA6B54144E0B2F68D58 /* DateUtils.swift in Sources */ C3A7C55881464CDDB7B1AE01 /* SyncEngine.swift in Sources */ 8A6BB727D2B145FCAA8FD579 /* Store.swift in Sources */ 2F52140905BC4BFA81F59BF6 /* HolidayService.swift in Sources */ BCC70D8D4F0B474D8EADFBB6 /* AIService.swift in Sources */ 802DCDCE4550421D89473AC3 /* Common.swift in Sources */ 90949B123C494924A2EFAF4B /* HomeView.swift in Sources */ AABC1223229747A4BFC83603 /* TimelineView.swift in Sources */ 9ADD263D6A2A48DFA7B45440 /* EventEditor.swift in Sources */ DF1F760F29B34E5B93E63B60 /* EventDetail.swift in Sources */ 6CD379C571F540D79DBA9A9F /* CategoryViews.swift in Sources */ 61F1B81E175442F2AEAED1CE /* Drawer.swift in Sources */ 82E454E7F9B54D0F87FA448C /* TrashView.swift in Sources */ B5E8E1FCEEF94F8CBA7899B4 /* SettingsView.swift in Sources */ AC73DEDD4F504F0888BC4ECB /* WidgetsView.swift in Sources */ EDF832C1840C40A7829E77E6 /* RootView.swift in Sources */ ); runOnlyForDeploymentPostprocessing = 0; };
-		F084A9E7B3AE4F63BC829CE3 /* Frameworks */ = { isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = ( ); runOnlyForDeploymentPostprocessing = 0; };
-		C0DD01C24A444A02BA9A2D4D /* Resources */ = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = ( 9DC885D0CB7C4270970A2B7F /* Assets.xcassets in Resources */ ); runOnlyForDeploymentPostprocessing = 0; };
-		B1420E06E30F47CDB88576D6 /* Sources */ = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = ( C8746B3164134F8DA4D88118 /* DaysNoteWidget.swift in Sources */ ); runOnlyForDeploymentPostprocessing = 0; };
-		FDD41AAD5BBC4B92A1E8236C /* Frameworks */ = { isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = ( ); runOnlyForDeploymentPostprocessing = 0; };
-		BC701BFD9F3A4845A0653AE0 /* Resources */ = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = ( ); runOnlyForDeploymentPostprocessing = 0; };
-		79FE279D2A7F481E8451AD9B /* Embed App Extensions */ = {
+		97CFFF1460BF4598A8A6750D /* Sources */ = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = ( A4741FF84EF74A278A5FD640 /* DaysNoteApp.swift in Sources */, F197EA9106654F7B8A65CB53 /* Models.swift in Sources */, 1FD04C2CE5C641A2BDD4F43D /* DateUtils.swift in Sources */, 3CD2ACC871C14997BE881029 /* SyncEngine.swift in Sources */, B39E1D7380D646EA9F1A9BC4 /* Store.swift in Sources */, B10589E6748B4556A46803DE /* HolidayService.swift in Sources */, FAC10E2F8BEF488691656B69 /* AIService.swift in Sources */, 5CA6D2A42148481295612D3E /* Common.swift in Sources */, 98DDA4F04C6746F9847D1D31 /* HomeView.swift in Sources */, B6C80E4AD9DA4758B881FA6C /* TimelineView.swift in Sources */, E0D2385F41EF46E88C86AA35 /* EventEditor.swift in Sources */, 3DABE8641633436ABBBEAA73 /* EventDetail.swift in Sources */, CDF37EE55A3444E4AD82962A /* CategoryViews.swift in Sources */, 31CCB0EE6C1B4871B7F56092 /* Drawer.swift in Sources */, 9343B830EECD440BB2998BF4 /* TrashView.swift in Sources */, AE55E7836426442F97103CD9 /* SettingsView.swift in Sources */, BB92700D16274EC18FF27CFF /* WidgetsView.swift in Sources */, 04B7202966B64F5FB8A6D63D /* RootView.swift in Sources */ ); runOnlyForDeploymentPostprocessing = 0; };
+		E4EE04C641F344CC9E1B382E /* Frameworks */ = { isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = ( ); runOnlyForDeploymentPostprocessing = 0; };
+		4733D2F718204EFB988938ED /* Resources */ = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = ( 215F3B44D55D4EB38B5621EB /* Assets.xcassets in Resources */ ); runOnlyForDeploymentPostprocessing = 0; };
+		C1F95EB512F24D31A1ECFE2B /* Sources */ = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = ( 08046FA94DF445608F02747B /* DaysNoteWidget.swift in Sources */ ); runOnlyForDeploymentPostprocessing = 0; };
+		B143A3D9C92846519E951B63 /* Frameworks */ = { isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = ( ); runOnlyForDeploymentPostprocessing = 0; };
+		A1A0B8383D334DE68015F6CC /* Resources */ = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = ( ); runOnlyForDeploymentPostprocessing = 0; };
+		0D482DC0187B43B091820A17 /* Embed App Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 13;
-			files = ( 336960D0FD2246AFA0A53040 /* DaysNoteWidget.appex in Embed App Extensions */ );
+			files = ( FD15A58E10B54DF5AD11236E /* DaysNoteWidget.appex in Embed App Extensions */ );
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		336960D0FD2246AFA0A53040 /* DaysNoteWidget.appex in Embed App Extensions */ = { isa = PBXBuildFile; fileRef = 84CA846E94B44EB883176240 /* DaysNoteWidget.appex */; settings = { ATTRIBUTES = ( RemoveHeadersOnCopy, ); }; };
-		C113DAE915204384BE08C0D7 = {
+		FD15A58E10B54DF5AD11236E /* DaysNoteWidget.appex in Embed App Extensions */ = { isa = PBXBuildFile; fileRef = 61958A11192A4E55A8C6EEF1 /* DaysNoteWidget.appex */; settings = { ATTRIBUTES = ( RemoveHeadersOnCopy, ); }; };
+		EFFF1889281145D6B80758F7 = {
 			isa = XCConfigurationList;
-			buildConfigurations = ( 774B1C5F444D46158C78E860, 39D6369B8C6D4587AA1355C9 );
+			buildConfigurations = ( 824BFE31DC6E4B2980308440, ABEAA0075B5A47CA9088EB8C );
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D88A2964C8EA45C0AF532A4A = {
+		5C938C94BB934133B0A928FD = {
 			isa = XCConfigurationList;
-			buildConfigurations = ( DE0F0795414D46B787E5B510, 3F1EE9DD811541359822FBD8 );
+			buildConfigurations = ( C64FA107AB624355973EC6C6, A07F0D21DA044283933060AC );
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		E1D170C56AD348EF85E5B7B7 = {
+		CEFBC53BE0EA488C9F45E253 = {
 			isa = XCConfigurationList;
-			buildConfigurations = ( 0A7D18D5923E42F6984C638E, 3AF136E56F5E47DB90C26A4D );
+			buildConfigurations = ( FFCE2B6878C14C5B851F479E, A62688F79C694DEA8183F44A );
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		774B1C5F444D46158C78E860 /* Debug */ = {
+		824BFE31DC6E4B2980308440 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = { ALWAYS_SEARCH_USER_PATHS = NO; SDKROOT = iphoneos; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SWIFT_VERSION = 5.0; };
 			name = Debug;
 		};
-		39D6369B8C6D4587AA1355C9 /* Release */ = {
+		ABEAA0075B5A47CA9088EB8C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = { ALWAYS_SEARCH_USER_PATHS = NO; SDKROOT = iphoneos; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SWIFT_VERSION = 5.0; };
 			name = Release;
 		};
-		DE0F0795414D46B787E5B510 /* Debug */ = {
+		C64FA107AB624355973EC6C6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
@@ -180,7 +180,7 @@
 			};
 			name = Debug;
 		};
-		3F1EE9DD811541359822FBD8 /* Release */ = {
+		A07F0D21DA044283933060AC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
@@ -211,7 +211,7 @@
 			};
 			name = Release;
 		};
-		0A7D18D5923E42F6984C638E /* Debug */ = {
+		FFCE2B6878C14C5B851F479E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
@@ -242,7 +242,7 @@
 			};
 			name = Debug;
 		};
-		3AF136E56F5E47DB90C26A4D /* Release */ = {
+		A62688F79C694DEA8183F44A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
@@ -273,5 +273,5 @@
 			name = Release;
 		};
 	};
-	rootObject = 67E18B01F10E4774A389A118 /* Project object */;
+	rootObject = 6AC81C33BAB14ACEAB1808BD /* Project object */;
 }
