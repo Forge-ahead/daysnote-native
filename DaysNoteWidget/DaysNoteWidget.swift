@@ -67,6 +67,22 @@ private func todayTitle() -> String {
 }
 private func todayWeek() -> Int { Calendar(identifier: .gregorian).component(.weekday, from: Date()) - 1 }
 
+// 空数据兜底：即使 App Group 数据未同步，桌面组件也一定有图形可显示
+private func demoEvents() -> [WidgetEvent] {
+    [
+        WidgetEvent(title: "生日", icon: "🎂", date: "2026-12-01", days: 6, dir: "future", color: ""),
+        WidgetEvent(title: "考试", icon: "📚", date: "2026-06-07", days: 194, dir: "future", color: ""),
+        WidgetEvent(title: "元旦", icon: "⏰", date: "2026-01-01", days: 37, dir: "future", color: ""),
+        WidgetEvent(title: "在一起", icon: "❤️", date: "2020-06-01", days: 2015, dir: "past", color: ""),
+        WidgetEvent(title: "出生", icon: "👶", date: "2006-01-01", days: 7939, dir: "past", color: ""),
+    ]
+}
+// WidgetKit 快照渲染不支持 Lazy 容器；统一在此取渲染用事件
+private func effectiveEvents(_ p: WidgetPayload, limit: Int) -> [WidgetEvent] {
+    let src = p.events.isEmpty ? demoEvents() : p.events
+    return Array(src.prefix(limit))
+}
+
 // 节日组件右侧兜底示例（无绑定时按原图显示节日清单）
 private func holidayDemos() -> [WidgetEvent] {
     [
@@ -144,12 +160,13 @@ struct PictureTealLargeWidget: Widget {
 private struct PictureTealLargeView: View {
     let entry: Entry
     var body: some View {
-        GeometryReader { g in
+        let evs = effectiveEvents(entry.payload, limit: 5)
+        return GeometryReader { g in
             VStack(spacing: 6) {
                 Text(todayTitle()).font(.system(size: 12, weight: .medium)).foregroundColor(.white)
                 VStack(spacing: 5) {
-                    ForEach(0..<min(5, entry.payload.events.count), id: \.self) { i in
-                        let ev = entry.payload.events[i]
+                    ForEach(0..<min(5, evs.count), id: \.self) { i in
+                        let ev = evs[i]
                         HStack(spacing: 6) {
                             Text(ev.title).font(.system(size: 13)).foregroundColor(Color(hexW: "#3a3835")).lineLimit(1)
                             if !ev.icon.isEmpty { Text(ev.icon).font(.system(size: 12)) }
@@ -190,14 +207,15 @@ struct ListBlueheadLargeWidget: Widget {
 private struct ListBlueheadLargeView: View {
     let entry: Entry
     var body: some View {
-        GeometryReader { g in
+        let evs = effectiveEvents(entry.payload, limit: 5)
+        return GeometryReader { g in
             VStack(spacing: 0) {
                 Text(todayTitle()).font(.system(size: 12, weight: .semibold)).foregroundColor(.white)
                     .frame(maxWidth: .infinity).padding(.vertical, 8)
                     .background(Color(hexW: "#3b82d6")).clipShape(RoundedRectangle(cornerRadius: 8))
                 VStack(spacing: 5) {
-                    ForEach(0..<min(5, entry.payload.events.count), id: \.self) { i in
-                        let ev = entry.payload.events[i]
+                    ForEach(0..<min(5, evs.count), id: \.self) { i in
+                        let ev = evs[i]
                         HStack(spacing: 6) {
                             HStack(spacing: 3) {
                                 Text(ev.title).font(.system(size: 13, weight: .semibold)).foregroundColor(Color(hexW: "#4a4844")).lineLimit(1)
@@ -241,23 +259,26 @@ struct GridRoseWidget: Widget {
 }
 private struct GridRoseView: View {
     let entry: Entry
-    var body: some View {
-        LazyVGrid(columns: [GridItem(.flexible(), spacing: 6), GridItem(.flexible(), spacing: 6)], spacing: 6) {
-            ForEach(0..<min(4, entry.payload.events.count), id: \.self) { i in
-                let ev = entry.payload.events[i]
-                VStack(alignment: .leading, spacing: 1) {
-                    HStack(spacing: 2) {
-                        if !ev.icon.isEmpty { Text(ev.icon).font(.system(size: 11)) }
-                        Text(ev.title).font(.system(size: 10, weight: .semibold)).foregroundColor(.white).lineLimit(1)
-                    }
-                    Text("\(shortDate(ev.date)) \(weekName(weekIndex(ev.date)))").font(.system(size: 8)).foregroundColor(.white.opacity(0.9))
-                    Spacer(minLength: 1)
-                    HStack { Spacer(); Text(daysText(ev)).font(.system(size: 20, weight: .bold)).foregroundColor(.white) }
-                }
-                .padding(7).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-                .background(LinearGradient(gradient: Gradient(colors: [Color(hexW: "#f0a8b8"), Color(hexW: "#e896ab")]), startPoint: .topLeading, endPoint: .bottomTrailing))
-                .clipShape(RoundedRectangle(cornerRadius: 9))
+    private func card(_ ev: WidgetEvent) -> some View {
+        VStack(alignment: .leading, spacing: 1) {
+            HStack(spacing: 2) {
+                if !ev.icon.isEmpty { Text(ev.icon).font(.system(size: 11)) }
+                Text(ev.title).font(.system(size: 10, weight: .semibold)).foregroundColor(.white).lineLimit(1)
             }
+            Text("\(shortDate(ev.date)) \(weekName(weekIndex(ev.date)))").font(.system(size: 8)).foregroundColor(.white.opacity(0.9))
+            Spacer(minLength: 1)
+            HStack { Spacer(); Text(daysText(ev)).font(.system(size: 20, weight: .bold)).foregroundColor(.white) }
+        }
+        .padding(7).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .background(LinearGradient(gradient: Gradient(colors: [Color(hexW: "#f0a8b8"), Color(hexW: "#e896ab")]), startPoint: .topLeading, endPoint: .bottomTrailing))
+        .clipShape(RoundedRectangle(cornerRadius: 9))
+    }
+    var body: some View {
+        // 注意：Widget 快照渲染不支持 Lazy 容器，必须用普通 HStack/VStack
+        let evs = effectiveEvents(entry.payload, limit: 4)
+        return VStack(spacing: 6) {
+            HStack(spacing: 6) { card(evs[0]); card(evs[1]) }
+            HStack(spacing: 6) { card(evs[2]); card(evs[3]) }
         }
         .padding(9).background(Color(hexW: "#fbedef"))
     }
@@ -297,9 +318,10 @@ private struct SimpleListView: View {
     let withTian: Bool
     let medium: Bool
     var body: some View {
-        VStack(spacing: medium ? 6 : 5) {
-            ForEach(0..<min(3, entry.payload.events.count), id: \.self) { i in
-                let ev = entry.payload.events[i]
+        let evs = effectiveEvents(entry.payload, limit: 3)
+        return VStack(spacing: medium ? 6 : 5) {
+            ForEach(0..<min(3, evs.count), id: \.self) { i in
+                let ev = evs[i]
                 let base = i < 2 ? Color(hexW: "#4a90d9") : Color(hexW: "#f0a04b")
                 let deep = i < 2 ? Color(hexW: "#3579c4") : Color(hexW: "#d98a2f")
                 HStack(spacing: 4) {
@@ -408,6 +430,7 @@ private struct HolidayView: View {
                 .background(LinearGradient(gradient: Gradient(colors: [bgAccent, bg]), startPoint: .topLeading, endPoint: .bottomTrailing))
 
                 VStack(spacing: 0) {
+                    // 优先用户绑定事件；为空时显示节日示例清单（与原图一致）
                     let evs = entry.payload.events.isEmpty ? holidayDemos() : Array(entry.payload.events.prefix(4))
                     ForEach(0..<min(4, evs.count), id: \.self) { i in
                         let ev = evs[i]
