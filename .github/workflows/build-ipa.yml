@@ -14,8 +14,18 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
-      - name: Install xcodegen and ldid
-        run: brew install xcodegen ldid
+      - name: Install xcodegen
+        run: brew install xcodegen
+
+      - name: Install Procursus ldid
+        run: |
+          set -euo pipefail
+          # 注意：homebrew 的 ldid 对新 ld 产物嵌入 entitlements 会静默失败（blob 为空），
+          # 必须使用 Procursus 官方 release 二进制。
+          curl -sL -o /usr/local/bin/ldid \
+            https://github.com/ProcursusTeam/ldid/releases/download/v2.1.5-procursus8/ldid_macosx_arm64
+          chmod +x /usr/local/bin/ldid
+          ldid 2>&1 | head -1 || true
 
       - name: Generate Xcode project
         run: |
@@ -53,6 +63,10 @@ jobs:
           ldid -SDaysNote/DaysNote.entitlements "$PWD/.ipa-stage/Payload/DaysNote.app/DaysNote"
           ldid -SDaysNoteWidget/DaysNoteWidget.entitlements \
             "$PWD/.ipa-stage/Payload/DaysNote.app/PlugIns/DaysNoteWidget.appex/DaysNoteWidget"
+          # 校验：entitlements 必须真正嵌入，否则小组件在系统中无法加载
+          ldid -e "$PWD/.ipa-stage/Payload/DaysNote.app/DaysNote" | grep -q application-groups || { echo "APP entitlements MISSING"; exit 1; }
+          ldid -e "$PWD/.ipa-stage/Payload/DaysNote.app/PlugIns/DaysNoteWidget.appex/DaysNoteWidget" | grep -q application-groups || { echo "WIDGET entitlements MISSING"; exit 1; }
+          echo "entitlements embedded OK"
           (cd "$PWD/.ipa-stage" && zip -qry "$PWD/DaysNote-native-unsigned.ipa" Payload)
           # zip 可能把绝对路径重建为嵌套目录，规整到根
           if [ ! -f "$PWD/DaysNote-native-unsigned.ipa" ] && [ -f "$PWD/.ipa-stage/DaysNote-native-unsigned.ipa" ]; then
