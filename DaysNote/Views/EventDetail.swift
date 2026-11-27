@@ -19,7 +19,7 @@ struct EventDetail: View {
                         Text(ev.icon).font(.system(size: 54))
                         Text(ev.title).font(.system(size: 24, weight: .bold))
                         Text(DateUtils.formatCN(ev.date)).font(.system(size: 13)).foregroundColor(Theme.muted)
-                        if ev.lunar { Text("农历 " + DateUtils.lunarText(ev.date)).font(.system(size: 12)).foregroundColor(Theme.muted) }
+                        if ev.lunar { Text("农历 " + LunarCalendar.lunarText(ev.date)).font(.system(size: 12)).foregroundColor(Theme.muted) }
                     }
                     .frame(maxWidth: .infinity).padding(.vertical, 16)
                     .background(Color(hex: ev.color)).clipShape(RoundedRectangle(cornerRadius: 18))
