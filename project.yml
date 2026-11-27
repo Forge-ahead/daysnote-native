@@ -1,0 +1,53 @@
+name: DaysNote
+options:
+  deploymentTarget:
+    iOS: "17.0"
+  bundleIdPrefix: com.daysnote
+  createIntermediateGroups: true
+  groupSortPosition: top
+
+settings:
+  SWIFT_VERSION: "5.0"
+  MARKETING_VERSION: "3.0.0"
+  CURRENT_PROJECT_VERSION: "31"
+  TARGETED_DEVICE_FAMILY: "1,2"
+  CODE_SIGN_IDENTITY: ""
+
+targets:
+  DaysNote:
+    type: application
+    platform: iOS
+    sources:
+      - DaysNote
+    excludes:
+      - DaysNote/Info.plist
+      - DaysNote/DaysNote.entitlements
+    info:
+      path: DaysNote/Info.plist
+    entitlements:
+      path: DaysNote/DaysNote.entitlements
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.daysnote.app
+      ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+      CODE_SIGN_ENTITLEMENTS: DaysNote/DaysNote.entitlements
+    dependencies:
+      - target: DaysNoteWidget
+        embed: true
+        codeSign: false
+
+  DaysNoteWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - DaysNoteWidget
+    excludes:
+      - DaysNoteWidget/Info.plist
+      - DaysNoteWidget/DaysNoteWidget.entitlements
+    info:
+      path: DaysNoteWidget/Info.plist
+    entitlements:
+      path: DaysNoteWidget/DaysNoteWidget.entitlements
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.daysnote.app.DaysNoteWidget
+      SKIP_INSTALL: YES
+      CODE_SIGN_ENTITLEMENTS: DaysNoteWidget/DaysNoteWidget.entitlements
