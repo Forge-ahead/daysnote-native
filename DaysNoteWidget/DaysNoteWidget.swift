@@ -275,10 +275,13 @@ private struct GridRoseView: View {
     }
     var body: some View {
         // 注意：Widget 快照渲染不支持 Lazy 容器，必须用普通 HStack/VStack
+        // 事件不足 4 条时用示例事件补位，绝不能越界（越界会导致扩展崩溃 → 黑块）
         let evs = effectiveEvents(entry.payload, limit: 4)
+        let demo = demoEvents()
+        let padded = (0..<4).map { i in i < evs.count ? evs[i] : demo[i % demo.count] }
         return VStack(spacing: 6) {
-            HStack(spacing: 6) { card(evs[0]); card(evs[1]) }
-            HStack(spacing: 6) { card(evs[2]); card(evs[3]) }
+            HStack(spacing: 6) { card(padded[0]); card(padded[1]) }
+            HStack(spacing: 6) { card(padded[2]); card(padded[3]) }
         }
         .padding(9).background(Color(hexW: "#fbedef"))
     }
