@@ -160,30 +160,31 @@ struct PictureTealLargeWidget: Widget {
 private struct PictureTealLargeView: View {
     let entry: Entry
     var body: some View {
-        let evs = effectiveEvents(entry.payload, limit: 5)
-        return GeometryReader { g in
-            VStack(spacing: 6) {
-                Text(todayTitle()).font(.system(size: 12, weight: .medium)).foregroundColor(.white)
-                VStack(spacing: 5) {
-                    ForEach(0..<min(5, evs.count), id: \.self) { i in
-                        let ev = evs[i]
-                        HStack(spacing: 6) {
-                            Text(ev.title).font(.system(size: 13)).foregroundColor(Color(hexW: "#3a3835")).lineLimit(1)
-                            if !ev.icon.isEmpty { Text(ev.icon).font(.system(size: 12)) }
-                            Spacer(minLength: 2)
-                            Text(daysText(ev)).font(.system(size: 18, weight: .bold)).foregroundColor(.white)
-                            Text("天").font(.system(size: 10)).foregroundColor(.white.opacity(0.95))
-                        }
-                        .padding(.horizontal, 10).padding(.vertical, 6)
-                        .background(Color.white.opacity(0.26)).clipShape(RoundedRectangle(cornerRadius: 8))
+        GeometryReader { g in
+            let evs = effectiveEvents(entry.payload, limit: 5)
+            let pad: CGFloat = g.size.height * 0.075
+            let headerH: CGFloat = g.size.height * 0.115
+            let spacing: CGFloat = g.size.height * 0.018
+            let n = max(1, evs.count)
+            let rowH = (g.size.height - pad * 2 - headerH - spacing * CGFloat(n - 1)) / CGFloat(n)
+            VStack(spacing: spacing) {
+                Text(todayTitle()).font(.system(size: g.size.height * 0.072, weight: .medium)).foregroundColor(.white)
+                    .frame(height: headerH)
+                ForEach(0..<evs.count, id: \.self) { i in
+                    let ev = evs[i]
+                    HStack(spacing: 6) {
+                        Text(ev.title).font(.system(size: rowH * 0.34)).foregroundColor(Color(hexW: "#3a3835")).lineLimit(1)
+                        if !ev.icon.isEmpty { Text(ev.icon).font(.system(size: rowH * 0.30)) }
+                        Spacer(minLength: 2)
+                        Text(daysText(ev)).font(.system(size: rowH * 0.44, weight: .bold)).foregroundColor(.white)
+                        Text("天").font(.system(size: rowH * 0.22)).foregroundColor(.white.opacity(0.95))
                     }
-                    if entry.payload.events.isEmpty {
-                        Text("暂无事件").font(.system(size: 12)).foregroundColor(.white.opacity(0.8))
-                    }
-                    Spacer(minLength: 0)
+                    .padding(.horizontal, 10)
+                    .frame(height: rowH)
+                    .background(Color.white.opacity(0.26)).clipShape(RoundedRectangle(cornerRadius: rowH * 0.2))
                 }
             }
-            .padding(12)
+            .padding(pad)
             .frame(width: g.size.width, height: g.size.height)
             .background(LinearGradient(gradient: Gradient(colors: [Color(hexW: "#5c9e96"), Color(hexW: "#6aaba2")]), startPoint: .topLeading, endPoint: .bottomTrailing))
         }
@@ -207,36 +208,40 @@ struct ListBlueheadLargeWidget: Widget {
 private struct ListBlueheadLargeView: View {
     let entry: Entry
     var body: some View {
-        let evs = effectiveEvents(entry.payload, limit: 5)
-        return GeometryReader { g in
-            VStack(spacing: 0) {
-                Text(todayTitle()).font(.system(size: 12, weight: .semibold)).foregroundColor(.white)
-                    .frame(maxWidth: .infinity).padding(.vertical, 8)
+        GeometryReader { g in
+            let evs = effectiveEvents(entry.payload, limit: 5)
+            let pad: CGFloat = g.size.height * 0.06
+            let headerH: CGFloat = g.size.height * 0.135
+            let spacing: CGFloat = g.size.height * 0.02
+            let n = max(1, evs.count)
+            let rowH = (g.size.height - pad * 2 - headerH - g.size.height * 0.02 - spacing * CGFloat(n - 1)) / CGFloat(n)
+            VStack(spacing: spacing) {
+                Text(todayTitle()).font(.system(size: g.size.height * 0.062, weight: .semibold)).foregroundColor(.white)
+                    .frame(maxWidth: .infinity).frame(height: headerH)
                     .background(Color(hexW: "#3b82d6")).clipShape(RoundedRectangle(cornerRadius: 8))
-                VStack(spacing: 5) {
-                    ForEach(0..<min(5, evs.count), id: \.self) { i in
-                        let ev = evs[i]
-                        HStack(spacing: 6) {
-                            HStack(spacing: 3) {
-                                Text(ev.title).font(.system(size: 13, weight: .semibold)).foregroundColor(Color(hexW: "#4a4844")).lineLimit(1)
-                                if !ev.icon.isEmpty { Text(ev.icon).font(.system(size: 12)) }
-                            }
-                            Spacer(minLength: 2)
-                            HStack(spacing: 3) {
-                                Text(daysText(ev)).font(.system(size: 15, weight: .bold)).foregroundColor(.white)
-                                Text("天").font(.system(size: 9)).foregroundColor(.white.opacity(0.9))
-                            }
-                            .padding(.horizontal, 8).padding(.vertical, 4)
-                            .background(i < 3 ? Color(hexW: "#4a90d9") : Color(hexW: "#f0a04b"))
-                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                ForEach(0..<evs.count, id: \.self) { i in
+                    let ev = evs[i]
+                    HStack(spacing: 6) {
+                        HStack(spacing: 3) {
+                            Text(ev.title).font(.system(size: rowH * 0.32, weight: .semibold)).foregroundColor(Color(hexW: "#4a4844")).lineLimit(1)
+                            if !ev.icon.isEmpty { Text(ev.icon).font(.system(size: rowH * 0.28)) }
                         }
-                        .padding(.horizontal, 8).padding(.vertical, 6)
-                        .background(Color(hexW: "#f5f6f8")).clipShape(RoundedRectangle(cornerRadius: 8))
+                        Spacer(minLength: 2)
+                        HStack(spacing: 3) {
+                            Text(daysText(ev)).font(.system(size: rowH * 0.36, weight: .bold)).foregroundColor(.white)
+                            Text("天").font(.system(size: rowH * 0.2)).foregroundColor(.white.opacity(0.9))
+                        }
+                        .padding(.horizontal, 8)
+                        .frame(height: rowH * 0.62)
+                        .background(i < 3 ? Color(hexW: "#4a90d9") : Color(hexW: "#f0a04b"))
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
                     }
-                    Spacer(minLength: 0)
-                }.padding(.top, 8)
+                    .padding(.horizontal, 8)
+                    .frame(height: rowH)
+                    .background(Color(hexW: "#f5f6f8")).clipShape(RoundedRectangle(cornerRadius: rowH * 0.2))
+                }
             }
-            .padding(12)
+            .padding(pad)
             .frame(width: g.size.width, height: g.size.height)
             .background(Color.white)
         }
@@ -321,40 +326,46 @@ private struct SimpleListView: View {
     let withTian: Bool
     let medium: Bool
     var body: some View {
-        let evs = effectiveEvents(entry.payload, limit: 3)
-        return VStack(spacing: medium ? 6 : 5) {
-            ForEach(0..<min(3, evs.count), id: \.self) { i in
-                let ev = evs[i]
-                let base = i < 2 ? Color(hexW: "#4a90d9") : Color(hexW: "#f0a04b")
-                let deep = i < 2 ? Color(hexW: "#3579c4") : Color(hexW: "#d98a2f")
-                HStack(spacing: 4) {
-                    HStack(spacing: 3) {
-                        Text(ev.title).font(.system(size: medium ? 15 : 13, weight: .semibold)).foregroundColor(Color(hexW: "#4a4844")).lineLimit(1)
-                        if !ev.icon.isEmpty { Text(ev.icon).font(.system(size: medium ? 14 : 12)) }
-                    }
-                    Spacer(minLength: 2)
-                    // 数字块贴右缘：数字色块 + 「天」分格（图3右），纯数字款无「天」格（图3左）
-                    HStack(spacing: 0) {
-                        Text(daysText(ev)).font(.system(size: medium ? 20 : 17, weight: .bold)).foregroundColor(.white)
-                            .frame(minWidth: medium ? 52 : 42, alignment: .center)
-                            .padding(.vertical, medium ? 5 : 3)
-                            .background(base)
-                        if withTian {
-                            Text("天").font(.system(size: medium ? 12 : 10, weight: .medium)).foregroundColor(.white)
-                                .frame(width: medium ? 32 : 26, alignment: .center)
-                                .padding(.vertical, medium ? 5 : 3)
-                                .background(deep)
+        GeometryReader { g in
+            let evs = effectiveEvents(entry.payload, limit: 3)
+            let pad: CGFloat = medium ? g.size.height * 0.055 : g.size.height * 0.05
+            let spacing: CGFloat = medium ? g.size.height * 0.045 : g.size.height * 0.04
+            let n = max(1, evs.count)
+            let rowH = (g.size.height - pad * 2 - spacing * CGFloat(n - 1)) / CGFloat(n)
+            let blockH = rowH * (medium ? 0.62 : 0.66)
+            VStack(spacing: spacing) {
+                ForEach(0..<evs.count, id: \.self) { i in
+                    let ev = evs[i]
+                    let base = i < 2 ? Color(hexW: "#4a90d9") : Color(hexW: "#f0a04b")
+                    let deep = i < 2 ? Color(hexW: "#3579c4") : Color(hexW: "#d98a2f")
+                    HStack(spacing: 4) {
+                        HStack(spacing: 3) {
+                            Text(ev.title).font(.system(size: rowH * 0.34, weight: .semibold)).foregroundColor(Color(hexW: "#4a4844")).lineLimit(1)
+                            if !ev.icon.isEmpty { Text(ev.icon).font(.system(size: rowH * 0.30)) }
                         }
+                        Spacer(minLength: 2)
+                        // 数字块贴右缘：数字色块 + 「天」分格（图3右），纯数字款无「天」格（图3左）
+                        HStack(spacing: 0) {
+                            Text(daysText(ev)).font(.system(size: rowH * 0.42, weight: .bold)).foregroundColor(.white)
+                                .frame(minWidth: blockH * 1.9, height: blockH, alignment: .center)
+                                .background(base)
+                            if withTian {
+                                Text("天").font(.system(size: rowH * 0.26, weight: .medium)).foregroundColor(.white)
+                                    .frame(width: blockH * 1.15, height: blockH, alignment: .center)
+                                    .background(deep)
+                            }
+                        }
+                        .clipShape(RoundedRectangle(cornerRadius: medium ? 7 : 6))
                     }
-                    .clipShape(RoundedRectangle(cornerRadius: medium ? 7 : 6))
+                    .padding(.horizontal, medium ? 10 : 8)
+                    .frame(height: rowH)
+                    .background(Color.white).clipShape(RoundedRectangle(cornerRadius: medium ? 9 : 8))
                 }
-                .padding(.horizontal, medium ? 10 : 8).frame(height: medium ? 42 : 34)
-                .background(Color.white).clipShape(RoundedRectangle(cornerRadius: medium ? 9 : 8))
             }
-            if entry.payload.events.isEmpty { Text("暂无事件").font(.system(size: 11)).foregroundColor(Color(hexW: "#a6a29a")) }
-            Spacer(minLength: 0)
+            .padding(pad)
+            .frame(width: g.size.width, height: g.size.height)
+            .background(Color(hexW: "#f2f2f0"))
         }
-        .padding(medium ? 9 : 8).background(Color(hexW: "#f2f2f0"))
     }
 }
 
