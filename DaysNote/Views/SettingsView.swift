@@ -254,7 +254,8 @@ struct SettingsView: View {
         let units = ["B", "KB", "MB", "GB"]
         let i = min(units.count - 1, Int(log(Double(n)) / log(1024)))
         let v = Double(n) / pow(1024, Double(i))
-        return "\(v >= 100 || i == 0 ? Int(v) : String(format: "%.1f", v)) \(units[i])"
+        let num = v >= 100 || i == 0 ? String(Int(v)) : String(format: "%.1f", v)
+        return "\(num) \(units[i])"
     }
 }
 
