@@ -8,8 +8,8 @@ options:
 
 settings:
   SWIFT_VERSION: "5.0"
-  MARKETING_VERSION: "3.1.0"
-  CURRENT_PROJECT_VERSION: "32"
+  MARKETING_VERSION: "3.1.1"
+  CURRENT_PROJECT_VERSION: "33"
   TARGETED_DEVICE_FAMILY: "1,2"
   CODE_SIGN_IDENTITY: ""
 
@@ -26,8 +26,8 @@ targets:
       path: DaysNote/Info.plist
       properties:
         CFBundleDisplayName: 纪念日
-        CFBundleShortVersionString: "3.1.0"
-        CFBundleVersion: "32"
+        CFBundleShortVersionString: "3.1.1"
+        CFBundleVersion: "33"
         UILaunchScreen: {}
         ITSAppUsesNonExemptEncryption: false
         MinimumOSVersion: "15.0"
@@ -53,8 +53,8 @@ targets:
     info:
       path: DaysNoteWidget/Info.plist
       properties:
-        CFBundleShortVersionString: "3.1.0"
-        CFBundleVersion: "32"
+        CFBundleShortVersionString: "3.1.1"
+        CFBundleVersion: "33"
         MinimumOSVersion: "15.0"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
