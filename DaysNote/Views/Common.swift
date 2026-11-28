@@ -18,11 +18,21 @@ enum Theme {
         case .gray: return Color(hex: dark ? "#26262a" : "#eeece7")
         }
     }
-    static let ink = Color(hex: "#3d3b3a")
-    static let muted = Color(hex: "#8d857c")
-    static let paper = Color(hex: "#fbfaf7")
-    static let line = Color(hex: "#e6e1d8")
-    static let accent = Color(hex: "#c2503c")
+    /// 随系统/App 外观动态解析：夜间模式用浅色字，避免深色字压在深色背景上看不清。
+    private static func adaptive(light: String, dark: String) -> Color {
+        Color(uiColor: UIColor { traits in
+            UIColor(hex: traits.userInterfaceStyle == .dark ? dark : light)
+        })
+    }
+
+    static let ink = adaptive(light: "#3d3b3a", dark: "#f3f0ea")
+    static let muted = adaptive(light: "#8d857c", dark: "#bdb5a9")
+    static let subtle = adaptive(light: "#a39f99", dark: "#a79f94")
+    static let paper = adaptive(light: "#fbfaf7", dark: "#212125")
+    static let line = adaptive(light: "#e6e1d8", dark: "#4a463f")
+    static let accent = adaptive(light: "#c2503c", dark: "#ef856c")
+    /// 时间轴里作为前景文字的绿色：夜间模式提亮。
+    static let greenText = adaptive(light: "#5b8f84", dark: "#8ed2bf")
 
     private static func gridImage() -> UIImage {
         // 与 Web V31 一致：22pt 方格，线色 rgba(214,211,202,.42)
