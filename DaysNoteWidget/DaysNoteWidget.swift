@@ -225,14 +225,12 @@ private struct ListBlueheadLargeView: View {
                             if !ev.icon.isEmpty { Text(ev.icon).font(.system(size: rowH * 0.28)) }
                         }
                         Spacer(minLength: 2)
-                        HStack(spacing: 3) {
-                            Text(daysText(ev)).font(.system(size: rowH * 0.36, weight: .bold)).foregroundColor(.white)
-                            Text("天").font(.system(size: rowH * 0.2)).foregroundColor(.white.opacity(0.9))
-                        }
-                        .padding(.horizontal, 8)
-                        .frame(height: rowH * 0.62)
-                        .background(i < 3 ? Color(hexW: "#4a90d9") : Color(hexW: "#f0a04b"))
-                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                        Text(daysText(ev)).font(.system(size: rowH * 0.36, weight: .bold)).foregroundColor(.white)
+                            .frame(minWidth: rowH * 1.15, alignment: .center)
+                            .padding(.horizontal, 8)
+                            .frame(height: rowH * 0.62)
+                            .background(i < 3 ? Color(hexW: "#4a90d9") : Color(hexW: "#f0a04b"))
+                            .clipShape(RoundedRectangle(cornerRadius: 6))
                     }
                     .padding(.horizontal, 8)
                     .frame(height: rowH)
