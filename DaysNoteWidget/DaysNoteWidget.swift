@@ -33,10 +33,27 @@ struct WidgetEvent: Codable, Equatable, Identifiable {
     var dir: String
     var color: String
 }
+struct WidgetTheme: Codable, Equatable {
+    var bg: String?
+    var ink: String?
+    static let `default` = WidgetTheme(bg: nil, ink: nil)
+}
 struct WidgetPayload: Codable {
     var events: [WidgetEvent]
     var holiday: HolidayCountdown?
+    var themes: [String: WidgetTheme]
     var updatedAt: TimeInterval
+    enum CodingKeys: String, CodingKey { case events, holiday, themes, updatedAt }
+    init(events: [WidgetEvent], holiday: HolidayCountdown?, themes: [String: WidgetTheme], updatedAt: TimeInterval) {
+        self.events = events; self.holiday = holiday; self.themes = themes; self.updatedAt = updatedAt
+    }
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        events = try c.decodeIfPresent([WidgetEvent].self, forKey: .events) ?? []
+        holiday = try c.decodeIfPresent(HolidayCountdown.self, forKey: .holiday)
+        themes = try c.decodeIfPresent([String: WidgetTheme].self, forKey: .themes) ?? [:]
+        updatedAt = try c.decodeIfPresent(TimeInterval.self, forKey: .updatedAt) ?? 0
+    }
 }
 struct HolidayCountdown: Codable, Equatable {
     var name: String
@@ -49,6 +66,11 @@ struct HolidayCountdown: Codable, Equatable {
 }
 
 // MARK: - 公共工具
+/// 主题色覆盖：用户自定义了就用自定义色，否则沿用模板默认色。
+private func themedColor(_ override: String?, _ fallback: String) -> Color {
+    guard let s = override, !s.isEmpty else { return Color(hexW: fallback) }
+    return Color(hexW: s)
+}
 private func daysText(_ e: WidgetEvent) -> String { daysText(e.days) }
 private func daysText(_ n: Int) -> String { n > 365 ? String(format: "%.2f年", Double(n) / 365) : "\(n)" }
 /// 数字与单位拆分：useYear=true 时大于一年换算成「年」，否则一律按「天」显示原始天数。
@@ -147,7 +169,7 @@ struct Provider: TimelineProvider {
             .appendingPathComponent("daysnote-widget.json")
         guard let u = url, let data = try? Data(contentsOf: u),
               let p = try? JSONDecoder().decode(WidgetPayload.self, from: data) else {
-            return WidgetPayload(events: [], holiday: nil, updatedAt: 0)
+            return WidgetPayload(events: [], holiday: nil, themes: [:], updatedAt: 0)
         }
         return p
     }
@@ -185,7 +207,7 @@ struct PictureTealLargeWidget: Widget {
     let kind = "picture-teal"
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { e in
-            WidgetRoot { PictureTealLargeView(entry: e) }
+            WidgetRoot { PictureTealLargeView(entry: e, theme: e.payload.themes["picture-teal"] ?? .default) }
         }
         .configurationDisplayName("图文倒计时列表 · 大号")
         .description("青绿底 · 顶部日期 · 5 行半透明卡片")
@@ -194,8 +216,11 @@ struct PictureTealLargeWidget: Widget {
 }
 private struct PictureTealLargeView: View {
     let entry: Entry
+    let theme: WidgetTheme
     var body: some View {
         GeometryReader { g in
+            let bg = themedColor(theme.bg, "#5c9e96")
+            let ink = themedColor(theme.ink, "#ffffff")
             let evs = effectiveEvents(entry.payload, limit: 5)
             let pad: CGFloat = g.size.height * 0.075
             let headerH: CGFloat = g.size.height * 0.115
@@ -203,25 +228,25 @@ private struct PictureTealLargeView: View {
             let n = max(1, evs.count)
             let rowH = (g.size.height - pad * 2 - headerH - spacing * CGFloat(n - 1)) / CGFloat(n)
             VStack(spacing: spacing) {
-                Text(todayTitle()).font(.system(size: g.size.height * 0.072, weight: .medium)).foregroundColor(.white)
+                Text(todayTitle()).font(.system(size: g.size.height * 0.072, weight: .medium)).foregroundColor(ink)
                     .frame(height: headerH)
                 ForEach(Array(evs.enumerated()), id: \.element.id) { i, ev in
                     HStack(spacing: 6) {
-                        Text(ev.title).font(.system(size: rowH * 0.34)).foregroundColor(Color(hexW: "#3a3835")).lineLimit(1)
+                        Text(ev.title).font(.system(size: rowH * 0.34)).foregroundColor(ink).lineLimit(1)
                         if !ev.icon.isEmpty { Text(ev.icon).font(.system(size: rowH * 0.30)) }
                         Spacer(minLength: 2)
                         let p = dayParts(ev.days)
-                        Text(p.num).font(.system(size: rowH * 0.44, weight: .bold)).foregroundColor(.white)
-                        Text(p.unit).font(.system(size: rowH * 0.22)).foregroundColor(.white.opacity(0.95))
+                        Text(p.num).font(.system(size: rowH * 0.44, weight: .bold)).foregroundColor(ink)
+                        Text(p.unit).font(.system(size: rowH * 0.22)).foregroundColor(ink.opacity(0.95))
                     }
                     .padding(.horizontal, 10)
                     .frame(height: rowH)
-                    .background(Color.white.opacity(0.26)).clipShape(RoundedRectangle(cornerRadius: rowH * 0.2))
+                    .background(ink.opacity(0.18)).clipShape(RoundedRectangle(cornerRadius: rowH * 0.2))
                 }
             }
             .padding(pad)
             .frame(width: g.size.width, height: g.size.height)
-            .background(LinearGradient(gradient: Gradient(colors: [Color(hexW: "#5c9e96"), Color(hexW: "#6aaba2")]), startPoint: .topLeading, endPoint: .bottomTrailing))
+            .background(LinearGradient(gradient: Gradient(colors: [bg, bg.opacity(0.88)]), startPoint: .topLeading, endPoint: .bottomTrailing))
         }
     }
 }
@@ -233,7 +258,7 @@ struct ListBlueheadLargeWidget: Widget {
     let kind = "list-bluehead"
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { e in
-            WidgetRoot { ListBlueheadLargeView(entry: e) }
+            WidgetRoot { ListBlueheadLargeView(entry: e, theme: e.payload.themes["list-bluehead"] ?? .default) }
         }
         .configurationDisplayName("简约倒计时列表 · 大号")
         .description("白底蓝头 · 5 行色块数字")
@@ -242,8 +267,11 @@ struct ListBlueheadLargeWidget: Widget {
 }
 private struct ListBlueheadLargeView: View {
     let entry: Entry
+    let theme: WidgetTheme
     var body: some View {
         GeometryReader { g in
+            let bg = themedColor(theme.bg, "#ffffff")
+            let ink = themedColor(theme.ink, "#4a4844")
             let evs = effectiveEvents(entry.payload, limit: 5)
             let pad: CGFloat = g.size.height * 0.06
             let headerH: CGFloat = g.size.height * 0.135
@@ -257,7 +285,7 @@ private struct ListBlueheadLargeView: View {
                 ForEach(Array(evs.enumerated()), id: \.element.id) { i, ev in
                     HStack(spacing: 6) {
                         HStack(spacing: 3) {
-                            Text(ev.title).font(.system(size: rowH * 0.32, weight: .semibold)).foregroundColor(Color(hexW: "#4a4844")).lineLimit(1)
+                            Text(ev.title).font(.system(size: rowH * 0.32, weight: .semibold)).foregroundColor(ink).lineLimit(1)
                             if !ev.icon.isEmpty { Text(ev.icon).font(.system(size: rowH * 0.28)) }
                         }
                         Spacer(minLength: 2)
@@ -268,12 +296,12 @@ private struct ListBlueheadLargeView: View {
                     }
                     .padding(.horizontal, 8)
                     .frame(height: rowH)
-                    .background(Color(hexW: "#f5f6f8")).clipShape(RoundedRectangle(cornerRadius: rowH * 0.2))
+                    .background(ink.opacity(0.07)).clipShape(RoundedRectangle(cornerRadius: rowH * 0.2))
                 }
             }
             .padding(pad)
             .frame(width: g.size.width, height: g.size.height)
-            .background(Color.white)
+            .background(bg)
         }
     }
 }
@@ -285,7 +313,7 @@ struct GridRoseWidget: Widget {
     let kind = "grid-rose"
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { e in
-            WidgetRoot { GridRoseView(entry: e) }
+            WidgetRoot { GridRoseView(entry: e, theme: e.payload.themes["grid-rose"] ?? .default) }
         }
         .configurationDisplayName("倒计时面板")
         .description("粉底 · 2×2 四大卡 · 4×2 中号")
@@ -294,31 +322,43 @@ struct GridRoseWidget: Widget {
 }
 private struct GridRoseView: View {
     let entry: Entry
-    private func card(_ ev: WidgetEvent) -> some View {
-        VStack(alignment: .leading, spacing: 1) {
-            HStack(spacing: 2) {
-                if !ev.icon.isEmpty { Text(ev.icon).font(.system(size: 11)) }
-                Text(ev.title).font(.system(size: 10, weight: .semibold)).foregroundColor(.white).lineLimit(1)
+    let theme: WidgetTheme
+    private func card(_ ev: WidgetEvent, cardH: CGFloat, ink: Color) -> some View {
+        VStack(alignment: .leading, spacing: cardH * 0.02) {
+            HStack(spacing: cardH * 0.04) {
+                if !ev.icon.isEmpty { Text(ev.icon).font(.system(size: cardH * 0.24)) }
+                Text(ev.title).font(.system(size: cardH * 0.24, weight: .semibold)).foregroundColor(ink).lineLimit(1)
             }
-            Text("\(shortDate(ev.date)) \(weekName(weekIndex(ev.date)))").font(.system(size: 8)).foregroundColor(.white.opacity(0.9))
+            Text("\(shortDate(ev.date)) \(weekName(weekIndex(ev.date)))")
+                .font(.system(size: cardH * 0.20)).foregroundColor(ink.opacity(0.92)).lineLimit(1)
             Spacer(minLength: 1)
-            HStack { Spacer(); Text(daysText(ev)).font(.system(size: 20, weight: .bold)).foregroundColor(.white) }
+            // 倒数日大数字保持原大小，不被放大
+            HStack { Spacer(); Text(daysText(ev)).font(.system(size: cardH * 0.30, weight: .bold)).foregroundColor(ink) }
         }
-        .padding(7).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .background(LinearGradient(gradient: Gradient(colors: [Color(hexW: "#f0a8b8"), Color(hexW: "#e896ab")]), startPoint: .topLeading, endPoint: .bottomTrailing))
-        .clipShape(RoundedRectangle(cornerRadius: 9))
+        .padding(cardH * 0.10).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .background(LinearGradient(gradient: Gradient(colors: [ink.opacity(0.22), ink.opacity(0.16)]), startPoint: .topLeading, endPoint: .bottomTrailing))
+        .clipShape(RoundedRectangle(cornerRadius: cardH * 0.14))
     }
     var body: some View {
-        // 注意：Widget 快照渲染不支持 Lazy 容器，必须用普通 HStack/VStack
-        // 事件不足 4 条时用示例事件补位，绝不能越界（越界会导致扩展崩溃 → 黑块）
-        let evs = effectiveEvents(entry.payload, limit: 4)
-        let demo = demoEvents()
-        let padded = (0..<4).map { i in i < evs.count ? evs[i] : demo[i % demo.count] }
-        return VStack(spacing: 6) {
-            HStack(spacing: 6) { card(padded[0]); card(padded[1]) }
-            HStack(spacing: 6) { card(padded[2]); card(padded[3]) }
+        let bg = themedColor(theme.bg, "#fbedef")
+        let ink = themedColor(theme.ink, "#a05a68")
+        return GeometryReader { g in
+            let H = g.size.height
+            let outerPad = H * 0.055
+            let spacing = H * 0.04
+            let cardH = (H - outerPad * 2 - spacing) / 2
+            // 注意：Widget 快照渲染不支持 Lazy 容器，必须用普通 HStack/VStack
+            // 事件不足 4 条时用示例事件补位，绝不能越界（越界会导致扩展崩溃 → 黑块）
+            let evs = effectiveEvents(entry.payload, limit: 4)
+            let demo = demoEvents()
+            let padded = (0..<4).map { i in i < evs.count ? evs[i] : demo[i % demo.count] }
+            VStack(spacing: spacing) {
+                HStack(spacing: spacing) { card(padded[0], cardH: cardH, ink: ink); card(padded[1], cardH: cardH, ink: ink) }
+                HStack(spacing: spacing) { card(padded[2], cardH: cardH, ink: ink); card(padded[3], cardH: cardH, ink: ink) }
+            }
+            .padding(outerPad).frame(width: g.size.width, height: g.size.height)
+            .background(bg)
         }
-        .padding(9).background(Color(hexW: "#fbedef"))
     }
 }
 
@@ -329,7 +369,7 @@ struct SimpleNumberSmallWidget: Widget {
     let kind = "simple-number"
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { e in
-            WidgetRoot { SimpleListView(entry: e, withTian: false, medium: false) }
+            WidgetRoot { SimpleListView(entry: e, withTian: false, medium: false, theme: e.payload.themes["simple-number"] ?? .default) }
         }
         .configurationDisplayName("简约倒计时列表 · 纯数字")
         .description("2×2 · 3 行色块数字")
@@ -344,7 +384,7 @@ struct SimpleDayMediumWidget: Widget {
     let kind = "simple-day"
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { e in
-            WidgetRoot { SimpleListView(entry: e, withTian: true, medium: true) }
+            WidgetRoot { SimpleListView(entry: e, withTian: true, medium: true, theme: e.payload.themes["simple-day"] ?? .default) }
         }
         .configurationDisplayName("简约倒计时列表 · 带天")
         .description("4×2 · 3 行数字+天")
@@ -355,8 +395,11 @@ private struct SimpleListView: View {
     let entry: Entry
     let withTian: Bool
     let medium: Bool
+    let theme: WidgetTheme
     var body: some View {
         GeometryReader { g in
+            let bg = themedColor(theme.bg, "#f2f2f0")
+            let ink = themedColor(theme.ink, "#4a4844")
             let evs = effectiveEvents(entry.payload, limit: 3)
             let pad: CGFloat = medium ? g.size.height * 0.055 : g.size.height * 0.05
             let spacing: CGFloat = medium ? g.size.height * 0.045 : g.size.height * 0.04
@@ -369,7 +412,7 @@ private struct SimpleListView: View {
                     HStack(spacing: 4) {
                         HStack(spacing: 3) {
                             // 2×2 纯数字款：缩小标题字号，不显示图标，给数字留足空间
-                            Text(ev.title).font(.system(size: rowH * (medium ? 0.34 : 0.26), weight: .semibold)).foregroundColor(Color(hexW: "#4a4844")).lineLimit(1)
+                            Text(ev.title).font(.system(size: rowH * (medium ? 0.34 : 0.26), weight: .semibold)).foregroundColor(ink).lineLimit(1)
                             if medium && !ev.icon.isEmpty { Text(ev.icon).font(.system(size: rowH * 0.30)) }
                         }
                         Spacer(minLength: 2)
@@ -380,12 +423,12 @@ private struct SimpleListView: View {
                     }
                     .padding(.horizontal, medium ? 10 : 8)
                     .frame(height: rowH)
-                    .background(Color.white).clipShape(RoundedRectangle(cornerRadius: medium ? 9 : 8))
+                    .background(ink.opacity(0.06)).clipShape(RoundedRectangle(cornerRadius: medium ? 9 : 8))
                 }
             }
             .padding(pad)
             .frame(width: g.size.width, height: g.size.height)
-            .background(Color(hexW: "#f2f2f0"))
+            .background(bg)
         }
     }
 }
@@ -397,7 +440,7 @@ struct HolidayOfficialWidget: Widget {
     let kind = "holiday-official"
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { e in
-            WidgetRoot { HolidayView(entry: e, fresh: false) }
+            WidgetRoot { HolidayView(entry: e, fresh: false, theme: e.payload.themes["holiday-official"] ?? .default) }
         }
         .configurationDisplayName("节日 · 经典白")
         .description("4×2 · 距离节假日 + 放假区间")
@@ -408,7 +451,7 @@ struct HolidayFreshWidget: Widget {
     let kind = "holiday-fresh"
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { e in
-            WidgetRoot { HolidayView(entry: e, fresh: true) }
+            WidgetRoot { HolidayView(entry: e, fresh: true, theme: e.payload.themes["holiday-fresh"] ?? .default) }
         }
         .configurationDisplayName("节日 · 清新绿")
         .description("4×2 · 距离节假日（绿）")
@@ -419,11 +462,12 @@ private struct HolidayView: View {
     let entry: Entry
     let fresh: Bool
     private let week = ["日", "一", "二", "三", "四", "五", "六"]
-    private var brand: Color { fresh ? Color(hexW: "#5c8a4a") : Color(hexW: "#4a4844") }
-    private var ink: Color { fresh ? Color(hexW: "#4a6141") : Color(hexW: "#3a3835") }
-    private var inkSoft: Color { fresh ? Color(hexW: "#93a488") : Color(hexW: "#a6a29a") }
-    private var bg: Color { fresh ? Color(hexW: "#eef0e6") : Color(hexW: "#fbfaf7") }
-    private var bgAccent: Color { fresh ? Color(hexW: "#e3e8d8") : Color(hexW: "#f2f0ea") }
+    let theme: WidgetTheme
+    private var brand: Color { themedColor(theme.ink, fresh ? "#5c8a4a" : "#4a4844") }
+    private var ink: Color { themedColor(theme.ink, fresh ? "#4a6141" : "#3a3835") }
+    private var inkSoft: Color { themedColor(theme.ink, fresh ? "#93a488" : "#a6a29a").opacity(0.75) }
+    private var bg: Color { themedColor(theme.bg, fresh ? "#eef0e6" : "#fbfaf7") }
+    private var bgAccent: Color { themedColor(theme.bg, fresh ? "#e3e8d8" : "#f2f0ea").opacity(0.9) }
     private var chipOn: Color { fresh ? Color(hexW: "#6f9a5d") : Color(hexW: "#4a4844") }
 
     var body: some View {
