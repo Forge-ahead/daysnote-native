@@ -49,7 +49,14 @@ struct HolidayCountdown: Codable, Equatable {
 }
 
 // MARK: - 公共工具
-private func daysText(_ e: WidgetEvent) -> String { e.days > 365 ? String(format: "%.2f年", Double(e.days) / 365) : "\(e.days)" }
+private func daysText(_ e: WidgetEvent) -> String { daysText(e.days) }
+private func daysText(_ n: Int) -> String { n > 365 ? String(format: "%.2f年", Double(n) / 365) : "\(n)" }
+/// 数字与单位拆分：大于一年换算成「年」，否则显示「天」。
+/// 蓝色块（近）显示天数配「天」；橘红色块（远，超过一年）显示年数配「年」。
+private func dayParts(_ n: Int) -> (num: String, unit: String) {
+    if n > 365 { return (String(format: "%.2f", Double(n) / 365), "年") }
+    return ("\(n)", "天")
+}
 private func shortDate(_ iso: String) -> String {
     let p = iso.split(separator: "-")
     return p.count >= 2 ? "\(p[p.count - 2])/\(p[p.count - 1])" : iso
@@ -91,6 +98,32 @@ private func holidayDemos() -> [WidgetEvent] {
         WidgetEvent(title: "春节", icon: "", date: "2026-02-17", days: 9, dir: "future", color: ""),
         WidgetEvent(title: "元宵节", icon: "", date: "2026-03-03", days: 23, dir: "future", color: ""),
     ]
+}
+
+/// 数字色块：大号数字 + 右下角小号单位（近=天 / 远=年）
+private struct DayBadge: View {
+    let days: Int
+    let showUnit: Bool
+    let base: Color
+    let numSize: CGFloat
+    let unitSize: CGFloat
+    let height: CGFloat
+    let radius: CGFloat
+    var body: some View {
+        let p = dayParts(days)
+        return HStack(alignment: .bottom, spacing: 1) {
+            Text(p.num).font(.system(size: numSize, weight: .bold)).foregroundColor(.white).lineLimit(1)
+            if showUnit {
+                Text(p.unit).font(.system(size: unitSize, weight: .semibold))
+                    .foregroundColor(.white.opacity(0.94))
+                    .padding(.bottom, numSize * 0.12)
+            }
+        }
+        .frame(height: height)
+        .padding(.horizontal, numSize * 0.45)
+        .background(base)
+        .clipShape(RoundedRectangle(cornerRadius: radius))
+    }
 }
 
 // MARK: - 时间线
@@ -175,8 +208,9 @@ private struct PictureTealLargeView: View {
                         Text(ev.title).font(.system(size: rowH * 0.34)).foregroundColor(Color(hexW: "#3a3835")).lineLimit(1)
                         if !ev.icon.isEmpty { Text(ev.icon).font(.system(size: rowH * 0.30)) }
                         Spacer(minLength: 2)
-                        Text(daysText(ev)).font(.system(size: rowH * 0.44, weight: .bold)).foregroundColor(.white)
-                        Text("天").font(.system(size: rowH * 0.22)).foregroundColor(.white.opacity(0.95))
+                        let p = dayParts(ev.days)
+                        Text(p.num).font(.system(size: rowH * 0.44, weight: .bold)).foregroundColor(.white)
+                        Text(p.unit).font(.system(size: rowH * 0.22)).foregroundColor(.white.opacity(0.95))
                     }
                     .padding(.horizontal, 10)
                     .frame(height: rowH)
@@ -225,12 +259,10 @@ private struct ListBlueheadLargeView: View {
                             if !ev.icon.isEmpty { Text(ev.icon).font(.system(size: rowH * 0.28)) }
                         }
                         Spacer(minLength: 2)
-                        Text(daysText(ev)).font(.system(size: rowH * 0.36, weight: .bold)).foregroundColor(.white)
-                            .frame(minWidth: rowH * 1.15, alignment: .center)
-                            .padding(.horizontal, 8)
-                            .frame(height: rowH * 0.62)
-                            .background(i < 3 ? Color(hexW: "#4a90d9") : Color(hexW: "#f0a04b"))
-                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                        DayBadge(days: ev.days, showUnit: true,
+                                 base: i < 3 ? Color(hexW: "#4a90d9") : Color(hexW: "#f0a04b"),
+                                 numSize: rowH * 0.36, unitSize: rowH * 0.18,
+                                 height: rowH * 0.62, radius: 6)
                     }
                     .padding(.horizontal, 8)
                     .frame(height: rowH)
@@ -338,12 +370,10 @@ private struct SimpleListView: View {
                             if !ev.icon.isEmpty { Text(ev.icon).font(.system(size: rowH * 0.30)) }
                         }
                         Spacer(minLength: 2)
-                        // 数字块贴右缘：数字色块 + 「天」分格（图3右），纯数字款无「天」格（图3左）
-                        Text(daysText(ev)).font(.system(size: rowH * 0.42, weight: .bold)).foregroundColor(.white)
-                            .frame(minWidth: blockH * 1.9, alignment: .center)
-                            .frame(height: blockH)
-                            .background(base)
-                            .clipShape(RoundedRectangle(cornerRadius: medium ? 7 : 6))
+                        // 数字块贴右缘：蓝色近事件显示「天」，橘红远事件（超一年）显示「年」；纯数字款不显示单位
+                        DayBadge(days: ev.days, showUnit: withTian, base: base,
+                                 numSize: rowH * 0.42, unitSize: rowH * 0.20,
+                                 height: blockH, radius: medium ? 7 : 6)
                     }
                     .padding(.horizontal, medium ? 10 : 8)
                     .frame(height: rowH)
