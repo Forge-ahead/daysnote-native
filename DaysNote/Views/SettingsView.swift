@@ -9,6 +9,7 @@ struct SettingsView: View {
     @State private var aiLog: [(role: String, text: String)] = []
     @State private var aiBusy = false
     @State private var importing = false
+    @StateObject private var speech = SpeechRecognizer()
 
     private let tabs = ["外观", "同步", "AI 助手", "数据"]
 
@@ -193,7 +194,8 @@ struct SettingsView: View {
                 Text("此操作不可撤销，也不会进回收站。").fontWeight(.semibold)
             }
             .font(.system(size: 13))
-            .foregroundColor(Theme.accent)
+            // 提示卡片底色固定为浅粉，文字也固定深色，避免夜间模式变成浅字浅底
+            .foregroundColor(Color(hex: "#8a3a2a"))
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color(hex: "#faece8"))
@@ -215,6 +217,75 @@ struct SettingsView: View {
 
     private var aiTab: some View {
         VStack(alignment: .leading, spacing: 10) {
+            // 1. 一句话管理事件：置顶，输入区加大、加语音录入
+            SectionTitle(text: "一句话管理事件")
+            CardPanel {
+                HStack(alignment: .bottom, spacing: 8) {
+                    TextField("说一句话管理事件，例如：新增生日 1993-09-14", text: $aiText)
+                        .font(.system(size: 15))
+                        .padding(.horizontal, 12).padding(.vertical, 10)
+                        .frame(minHeight: 46)
+                        .background(Color(uiColor: .secondarySystemBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.line, lineWidth: 1))
+
+                    Button {
+                        if speech.isRecording {
+                            speech.stop()
+                            if !speech.transcript.isEmpty { aiText = speech.transcript }
+                        } else {
+                            speech.start()
+                        }
+                    } label: {
+                        Image(systemName: speech.isRecording ? "stop.circle.fill" : "mic.circle.fill")
+                            .font(.system(size: 28))
+                            .foregroundColor(speech.isRecording ? Theme.accent : Color(hex: "#6f8a6a"))
+                    }
+                    .frame(width: 34, height: 46)
+                    .accessibilityLabel(speech.isRecording ? "停止语音录入" : "语音录入")
+
+                    Button(action: sendAI) {
+                        Text(aiBusy ? "…" : "发送")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(width: 56, height: 46)
+                            .background(Color(hex: "#6f8a6a"))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                    .disabled(aiBusy || aiText.isEmpty)
+                    .opacity(aiBusy || aiText.isEmpty ? 0.5 : 1)
+                }
+
+                if speech.isRecording {
+                    Text("正在聆听… \(speech.transcript.isEmpty ? "请说话" : speech.transcript)")
+                        .font(.system(size: 12)).foregroundColor(Theme.greenText).lineLimit(2)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                } else if let err = speech.errorMessage {
+                    Text(err).font(.system(size: 12)).foregroundColor(Theme.accent)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+
+                ScrollView {
+                    ForEach(aiLog.indices, id: \.self) { i in
+                        HStack {
+                            if aiLog[i].role == "ai" { Spacer() }
+                            Text(aiLog[i].text).font(.system(size: 13)).padding(10)
+                                .background(aiLog[i].role == "user" ? Color(hex: "#eef0e6") : Color(uiColor: .secondarySystemBackground))
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                            if aiLog[i].role == "user" { Spacer() }
+                        }
+                    }
+                }.frame(height: 200)
+            }
+            .onChange(of: speech.transcript) { t in
+                if speech.isRecording && !t.isEmpty { aiText = t }
+            }
+
+            // 2. 中间保留间隔
+            Spacer(minLength: 18)
+
+            // 3. API 配置放在下面
+            SectionTitle(text: "API 设置")
             CardPanel {
                 TextField("API 地址", text: Binding(get: { store.settings.aiBaseUrl }, set: { store.settings.aiBaseUrl = $0; store.save() }))
                     .textFieldStyle(.roundedBorder).autocapitalization(.none).keyboardType(.URL)
@@ -223,32 +294,23 @@ struct SettingsView: View {
                 TextField("模型", text: Binding(get: { store.settings.aiModel }, set: { store.settings.aiModel = $0; store.save() }))
                     .textFieldStyle(.roundedBorder)
             }
-            ScrollView {
-                ForEach(aiLog.indices, id: \.self) { i in
-                    HStack {
-                        if aiLog[i].role == "ai" { Spacer() }
-                        Text(aiLog[i].text).font(.system(size: 13)).padding(10)
-                            .background(aiLog[i].role == "user" ? Color(hex: "#eef0e6") : Color(uiColor: .secondarySystemBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                        if aiLog[i].role == "user" { Spacer() }
-                    }
-                }
-            }.frame(height: 220)
-            HStack {
-                TextField("说一句话管理事件，例如：新增生日 1993-09-14", text: $aiText)
-                    .textFieldStyle(.roundedBorder)
-                Button(aiBusy ? "…" : "发送") {
-                    let q = aiText; guard !q.isEmpty, !aiBusy else { return }
-                    aiText = ""; aiLog.append((role: "user", text: q)); aiBusy = true
-                    Task {
-                        do {
-                            let ans = try await AIService.shared.ask(q, settings: store.settings, store: store)
-                            aiLog.append((role: "ai", text: ans))
-                        } catch { aiLog.append((role: "ai", text: error.localizedDescription)) }
-                        aiBusy = false
-                    }
-                }.disabled(aiBusy)
+        }
+    }
+
+    private func sendAI() {
+        let q = aiText
+        guard !q.isEmpty, !aiBusy else { return }
+        aiText = ""
+        aiLog.append((role: "user", text: q))
+        aiBusy = true
+        Task {
+            do {
+                let ans = try await AIService.shared.ask(q, settings: store.settings, store: store)
+                aiLog.append((role: "ai", text: ans))
+            } catch {
+                aiLog.append((role: "ai", text: error.localizedDescription))
             }
+            aiBusy = false
         }
     }
 
