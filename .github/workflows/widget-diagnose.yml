@@ -58,6 +58,18 @@ jobs:
           echo "===== pluginkit matching daysnote ====="
           xcrun simctl spawn "$DEVICE" pluginkit -m -v -A | grep -i daysnote || echo "NO PLUGIN REGISTERED"
 
+      - name: Run appex binary directly (dyld/launch check)
+        run: |
+          set -eo pipefail
+          DEVICE=`cat device.env`
+          APPEX="$PWD/.simbuild/Build/Products/Debug-iphonesimulator/DaysNoteWidget.appex"
+          # 直接在模拟器里拉起扩展主二进制：若 dyld/链接出错会立刻打印错误
+          (xcrun simctl spawn "$DEVICE" "$APPEX/DaysNoteWidget" > appex-run.txt 2>&1 & APID=$!; sleep 12; kill $APID 2>/dev/null; true)
+          echo "===== appex direct run output ====="
+          cat appex-run.txt || true
+          echo "===== host crash reports for DaysNoteWidget ====="
+          ls -t ~/Library/Logs/DiagnosticReports/ 2>/dev/null | grep -i daysnote | head -5 || echo "no crash reports"
+
       - name: Trigger widget timeline and capture logs
         run: |
           set -eo pipefail
