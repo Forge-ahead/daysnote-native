@@ -139,7 +139,7 @@ struct HolidayCountdown: Codable, Equatable {
 enum Constants {
     static let appGroup = "group.com.daysnote.app"
     static let schemaVersion = 7
-    static let appVersion = "3.1.5"
+    static let appVersion = "3.1.6"
     static let build = 31
     static let cardColors = ["#e3e9d5", "#dbe7f1", "#fbe0b8", "#f0c8c4", "#dfc8d1", "#c7ddd9", "#d7d2c4"]
     static let categoryColors = ["#f3b8c2", "#a8d3d2", "#e8786d", "#5bb894", "#f6cd6e", "#9fb8e8", "#c7a9dc"]
