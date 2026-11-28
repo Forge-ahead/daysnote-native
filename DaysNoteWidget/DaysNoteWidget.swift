@@ -334,7 +334,6 @@ private struct SimpleListView: View {
             VStack(spacing: spacing) {
                 ForEach(Array(evs.enumerated()), id: \.element.id) { i, ev in
                     let base = i < 2 ? Color(hexW: "#4a90d9") : Color(hexW: "#f0a04b")
-                    let deep = i < 2 ? Color(hexW: "#3579c4") : Color(hexW: "#d98a2f")
                     HStack(spacing: 4) {
                         HStack(spacing: 3) {
                             Text(ev.title).font(.system(size: rowH * 0.34, weight: .semibold)).foregroundColor(Color(hexW: "#4a4844")).lineLimit(1)
@@ -342,18 +341,11 @@ private struct SimpleListView: View {
                         }
                         Spacer(minLength: 2)
                         // 数字块贴右缘：数字色块 + 「天」分格（图3右），纯数字款无「天」格（图3左）
-                        HStack(spacing: 0) {
-                            Text(daysText(ev)).font(.system(size: rowH * 0.42, weight: .bold)).foregroundColor(.white)
-                                .frame(minWidth: blockH * 1.9, alignment: .center)
-                                .frame(height: blockH)
-                                .background(base)
-                            if withTian {
-                                Text("天").font(.system(size: rowH * 0.26, weight: .medium)).foregroundColor(.white)
-                                    .frame(width: blockH * 1.15, height: blockH, alignment: .center)
-                                    .background(deep)
-                            }
-                        }
-                        .clipShape(RoundedRectangle(cornerRadius: medium ? 7 : 6))
+                        Text(daysText(ev)).font(.system(size: rowH * 0.42, weight: .bold)).foregroundColor(.white)
+                            .frame(minWidth: blockH * 1.9, alignment: .center)
+                            .frame(height: blockH)
+                            .background(base)
+                            .clipShape(RoundedRectangle(cornerRadius: medium ? 7 : 6))
                     }
                     .padding(.horizontal, medium ? 10 : 8)
                     .frame(height: rowH)
