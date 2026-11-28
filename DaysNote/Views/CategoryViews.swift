@@ -20,7 +20,7 @@ struct CategoryGrid: View {
                             VStack(alignment: .leading, spacing: 10) {
                                 Circle().fill(Color(hex: c.color)).frame(width: 30, height: 30)
                                 Text(c.name).font(.system(size: 16, weight: .semibold))
-                                Text("\(store.events.filter { c.id == "cat:all" || $0.categoryId == c.id }.count) 个事件")
+                                Text("\(c.id == Festivals.categoryId ? Festivals.festivalEvents().count : store.events.filter { c.id == "cat:all" || $0.categoryId == c.id }.count) 个事件")
                                     .font(.system(size: 11)).foregroundColor(Theme.muted)
                             }
                             .frame(maxWidth: .infinity, alignment: .leading).padding(16)
@@ -58,7 +58,7 @@ struct CategoryList: View {
                                 get: { c.name },
                                 set: { store.updateCategory(c.id, name: $0, color: c.color) }
                             )).textFieldStyle(.plain).font(.system(size: 15))
-                            if c.id != "cat:all" {
+                            if c.builtin != true {
                                 Button(action: { store.removeCategory(c.id) }) {
                                     Image(systemName: "trash").font(.system(size: 14)).foregroundColor(Theme.accent)
                                 }
