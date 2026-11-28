@@ -252,7 +252,7 @@ struct TimelineView: View {
             } label: {
                 HStack(alignment: .center, spacing: 0) {
                     Text(diffLabel(r.diff))
-                        .font(.system(size: 14)).foregroundColor(isToday ? Color(hex: "#5b8f84") : Theme.muted)
+                        .font(.system(size: 14)).foregroundColor(isToday ? Theme.greenText : Theme.muted)
                         .frame(width: 74, alignment: .trailing)
                     ZStack {
                         Rectangle().fill(Color(hex: "#e4e0d8")).frame(width: 1)
@@ -263,10 +263,10 @@ struct TimelineView: View {
                     }.frame(width: 38)
                     VStack(alignment: .leading, spacing: 5) {
                         Text((isToday ? "今天 · " : "") + md(r.date) + " " + week(r.date) + (isFestival ? (r.kind == "lunar" ? " · 农历" : " · 节日") : ""))
-                            .font(.system(size: 12)).foregroundColor(isToday ? Color(hex: "#5b8f84") : Color(hex: "#a39f99"))
+                            .font(.system(size: 12)).foregroundColor(isToday ? Theme.greenText : Theme.subtle)
                         Text(r.title)
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(isToday ? Color(hex: "#5b8f84") : Theme.ink)
+                            .foregroundColor(isToday ? Theme.greenText : Theme.ink)
                     }
                     Spacer(minLength: 4)
                     if !r.icon.isEmpty { Text(r.icon).font(.system(size: 20)).opacity(0.7) }
