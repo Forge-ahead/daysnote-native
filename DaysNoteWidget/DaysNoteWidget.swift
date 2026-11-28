@@ -70,7 +70,7 @@ struct HolidayCountdown: Codable, Equatable {
 /// 只接受合法 #RRGGBB，避免旧缓存里异常字符串被当成 0x000000 渲染成纯黑。
 private func themedColor(_ override: String?, _ fallback: String) -> Color {
     guard let s = override, !s.isEmpty, s.hasPrefix("#"), s.count == 7,
-          Int(s.dropFirst(), 16) != nil else { return Color(hexW: fallback) }
+          Int(String(s.dropFirst()), 16) != nil else { return Color(hexW: fallback) }
     return Color(hexW: s)
 }
 private func daysText(_ e: WidgetEvent) -> String { daysText(e.days) }
