@@ -69,8 +69,8 @@ struct HolidayCountdown: Codable, Equatable {
 /// 主题色覆盖：用户自定义了就用自定义色，否则沿用模板默认色。
 /// 只接受合法 #RRGGBB，避免旧缓存里异常字符串被当成 0x000000 渲染成纯黑。
 private func themedColor(_ override: String?, _ fallback: String) -> Color {
-    guard let s = override, !s.isEmpty, s.hasPrefix("#"), s.count == 7,
-          Int(String(s.dropFirst()), 16) != nil else { return Color(hexW: fallback) }
+    guard let s = override, s.count == 7, s.hasPrefix("#"),
+          s.dropFirst().allSatisfy({ $0.isHexDigit }) else { return Color(hexW: fallback) }
     return Color(hexW: s)
 }
 private func daysText(_ e: WidgetEvent) -> String { daysText(e.days) }
