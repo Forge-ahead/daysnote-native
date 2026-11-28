@@ -11,6 +11,8 @@
     <key>UIApplicationSupportsMultipleScenes</key><false/>
   </dict>
   <key>ITSAppUsesNonExemptEncryption</key><false/>
+  <key>NSSpeechRecognitionUsageDescription</key><string>使用系统语音识别把你说的话转成文字，用于一句话管理事件。</string>
+  <key>NSMicrophoneUsageDescription</key><string>用于语音录入，把你说的话转成文字后管理事件。</string>
   <key>NSAppTransportSecurity</key><dict>
     <key>NSAllowsArbitraryLoads</key><false/>
   </dict>
