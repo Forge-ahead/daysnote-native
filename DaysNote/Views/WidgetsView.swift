@@ -153,12 +153,18 @@ private func dayParts(_ n: Int, useYear: Bool = true) -> (num: String, unit: Str
 
 @MainActor private func pickWidgetEvents(_ t: WidgetTemplate, store: Store) -> [EventItem] {
     let b = store.bindings[t.id] ?? .empty
+    let wantsFestivals = b.categoryIds.contains(Festivals.categoryId) || b.eventIds.contains { $0.hasPrefix("festival:") }
+    let festivalPool = wantsFestivals ? Festivals.festivalEvents() : []
+    let pool = store.events + festivalPool
     var picked: [EventItem]
     if b.mode == "events" && !b.eventIds.isEmpty {
-        picked = store.events.filter { b.eventIds.contains($0.id) }
+        let set = Set(b.eventIds)
+        picked = pool.filter { set.contains($0.id) }
+        if b.categoryIds.contains(Festivals.categoryId) { picked += festivalPool }
     } else if !b.categoryIds.isEmpty {
         let set = Set(b.categoryIds)
-        picked = store.events.filter { set.contains($0.categoryId) }
+        if set.contains("cat:all") { picked = pool }
+        else { picked = pool.filter { set.contains($0.categoryId) } }
     } else {
         picked = store.events
     }
@@ -758,6 +764,8 @@ private struct WidgetModal: View {
                         }
                         Text("数据来自国务院放假安排，每月自动联网更新一次；离线时使用上次缓存或农历推算。")
                             .font(.system(size: 10)).foregroundColor(Theme.muted)
+                        Text("在下方「选分类」中勾选「节日」即可单独列出全部常见节日（含春节、清明、劳动节、国庆等）；也可同时勾选其他分类，节日与该分类事件一起显示。")
+                            .font(.system(size: 10)).foregroundColor(Theme.greenText)
                     }
                     .padding(10).background(Color(uiColor: .secondarySystemBackground))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -772,10 +780,11 @@ private struct WidgetModal: View {
                 if binding.mode == "events" {
                     Text("勾选特定事件（可多选，按临近日期排序）。已选 \(binding.eventIds.count) 个。")
                         .font(.system(size: 11)).foregroundColor(Theme.muted)
-                    ForEach(store.events) { ev in
+                    ForEach(store.events + Festivals.festivalEvents()) { ev in
                         let on = binding.eventIds.contains(ev.id)
                         let info = DateUtils.dayInfo(ev)
-                        checkRow(color: Color(hex: ev.color), label: "\(ev.icon) \(ev.title)",
+                        let isFestival = ev.categoryId == Festivals.categoryId
+                        checkRow(color: Color(hex: ev.color), label: "\(ev.icon) \(ev.title)\(isFestival ? " · 节日" : "")",
                                  sub: info.dir == "future" ? "还有\(info.days)天" : "\(info.days)天前", on: on) {
                             var ids = binding.eventIds
                             if let i = ids.firstIndex(of: ev.id) { ids.remove(at: i) } else { ids.append(ev.id) }
@@ -787,7 +796,10 @@ private struct WidgetModal: View {
                         .font(.system(size: 11)).foregroundColor(Theme.muted)
                     ForEach(store.categories) { c in
                         let on = binding.categoryIds.contains(c.id)
-                        let cnt = c.id == "cat:all" ? store.events.count : store.events.filter { $0.categoryId == c.id }.count
+                        let festivals = Festivals.festivalEvents()
+                        let cnt = c.id == "cat:all" ? store.events.count + festivals.count
+                                  : c.id == Festivals.categoryId ? festivals.count
+                                  : store.events.filter { $0.categoryId == c.id }.count
                         checkRow(color: Color(hex: c.color), label: c.name, sub: "\(cnt) 个事件", on: on) {
                             var ids = binding.categoryIds
                             if let i = ids.firstIndex(of: c.id) { ids.remove(at: i) } else { ids.append(c.id) }
