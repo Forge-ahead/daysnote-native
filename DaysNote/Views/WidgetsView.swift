@@ -370,7 +370,6 @@ private struct SimplePanel: View {
             ForEach(0..<min(3, evs.count), id: \.self) { i in
                 let e = evs[i]
                 let base = i < 2 ? wc(t.skin.hot) : wc(t.skin.far)
-                let deep = i < 2 ? Color(hex: "#3579c4") : Color(hex: "#d98a2f")
                 HStack(spacing: 4) {
                     HStack(spacing: 2) {
                         Text(e.title).font(.system(size: mini ? 10 : 15, weight: .semibold)).foregroundColor(wc(t.skin.ink)).lineLimit(1)
@@ -378,18 +377,10 @@ private struct SimplePanel: View {
                     }
                     Spacer(minLength: 2)
                     // 数字块贴右缘：纯数字款（图3左）无「天」格；带天款（图3右）数字+天分色格
-                    HStack(spacing: 0) {
-                        Text(daysText(e.days)).font(.system(size: mini ? 14 : 20, weight: .bold)).foregroundColor(.white)
-                            .frame(minWidth: mini ? 34 : 52, alignment: .center)
-                            .padding(.vertical, mini ? 2 : 5)
-                            .background(base)
-                        if withTian {
-                            Text("天").font(.system(size: mini ? 8 : 12, weight: .medium)).foregroundColor(.white)
-                                .frame(width: mini ? 20 : 32, alignment: .center)
-                                .padding(.vertical, mini ? 2 : 5)
-                                .background(deep)
-                        }
-                    }
+                    Text(daysText(e.days)).font(.system(size: mini ? 14 : 20, weight: .bold)).foregroundColor(.white)
+                        .frame(minWidth: mini ? 34 : 52, alignment: .center)
+                        .padding(.vertical, mini ? 2 : 5)
+                        .background(base)
                     .clipShape(RoundedRectangle(cornerRadius: mini ? 6 : 7))
                 }
                 .padding(.horizontal, mini ? 6 : 10).frame(height: mini ? 28 : 42)
