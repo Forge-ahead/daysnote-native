@@ -33,6 +33,10 @@ enum Theme {
     static let accent = adaptive(light: "#c2503c", dark: "#ef856c")
     /// 时间轴里作为前景文字的绿色：夜间模式提亮。
     static let greenText = adaptive(light: "#5b8f84", dark: "#8ed2bf")
+    /// 固定浅色卡片上的前景文字：卡片颜色是写死的浅色，不随夜间模式变深。
+    /// 若这里用自适应浅色字，夜间会出现「浅字压浅底」导致首页日期/倒数日看不清。
+    static let inkOnLightCard = Color(hex: "#3d3b3a")
+    static let mutedOnLightCard = Color(hex: "#6f675e")
 
     private static func gridImage() -> UIImage {
         // 与 Web V31 一致：22pt 方格，线色 rgba(214,211,202,.42)
