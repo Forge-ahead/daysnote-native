@@ -471,12 +471,10 @@ private struct ListLargePanel: View {
                     HStack {
                         Text("\(e.title) \(e.icon)").font(.system(size: mini ? 8 : 11, weight: .semibold)).foregroundColor(wc(t.skin.ink)).lineLimit(1)
                         Spacer(minLength: 2)
-                        HStack(spacing: 1) {
-                            Text(daysText(e.days)).font(.system(size: mini ? 11 : 16, weight: .bold)).foregroundColor(.white)
-                            Text("天").font(.system(size: mini ? 5 : 8)).foregroundColor(.white.opacity(0.9))
-                        }
-                        .padding(.horizontal, mini ? 4 : 8).padding(.vertical, mini ? 1 : 3)
-                        .background(i < 3 ? wc(t.skin.hot) : wc(t.skin.far)).clipShape(RoundedRectangle(cornerRadius: 6))
+                        Text(daysText(e.days)).font(.system(size: mini ? 11 : 16, weight: .bold)).foregroundColor(.white)
+                            .frame(minWidth: mini ? 22 : 34, alignment: .center)
+                            .padding(.horizontal, mini ? 4 : 8).padding(.vertical, mini ? 1 : 3)
+                            .background(i < 3 ? wc(t.skin.hot) : wc(t.skin.far)).clipShape(RoundedRectangle(cornerRadius: 6))
                     }
                     .padding(.horizontal, mini ? 4 : 8).padding(.vertical, mini ? 2 : 5)
                     .background(wc(t.skin.rowBg)).clipShape(RoundedRectangle(cornerRadius: 8))
