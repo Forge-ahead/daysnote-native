@@ -110,6 +110,11 @@ private func shortDate(_ iso: String) -> String {
     return "\(p[p.count - 2])/\(p[p.count - 1])"
 }
 private func daysText(_ n: Int) -> String { n > 365 ? String(format: "%.2f年", Double(n) / 365.0) : "\(n)" }
+/// 与桌面小组件一致：大号数字 + 小号单位（近=天 / 远=年）
+private func dayParts(_ n: Int) -> (num: String, unit: String) {
+    if n > 365 { return (String(format: "%.2f", Double(n) / 365.0), "年") }
+    return ("\(n)", "天")
+}
 
 @MainActor private func pickWidgetEvents(_ t: WidgetTemplate, store: Store) -> [EventItem] {
     let b = store.bindings[t.id] ?? .empty
@@ -192,7 +197,10 @@ struct WidgetsView: View {
                 .overlay(Rectangle().fill(Theme.line).frame(height: 1), alignment: .bottom)
                 .padding(.horizontal, 14).padding(.top, 14)
 
-                LazyVGrid(columns: [GridItem(.flexible(), spacing: 14), GridItem(.flexible())], spacing: 18) {
+                // 中号 4×2 组件用单列满宽预览，跟桌面实际比例一致；小/大号保持两列
+                LazyVGrid(columns: tab == "中"
+                            ? [GridItem(.flexible())]
+                            : [GridItem(.flexible(), spacing: 14), GridItem(.flexible())], spacing: 18) {
                     ForEach(WidgetTemplate.all.filter { $0.category == tab }) { t in
                         VStack(spacing: 0) {
                             Button(action: { selected = t }) {
@@ -366,29 +374,47 @@ private struct SimplePanel: View {
     let withTian: Bool
 
     var body: some View {
-        VStack(spacing: mini ? 4 : 6) {
-            ForEach(0..<min(3, evs.count), id: \.self) { i in
-                let e = evs[i]
-                let base = i < 2 ? wc(t.skin.hot) : wc(t.skin.far)
-                HStack(spacing: 4) {
-                    HStack(spacing: 2) {
-                        Text(e.title).font(.system(size: mini ? 10 : 15, weight: .semibold)).foregroundColor(wc(t.skin.ink)).lineLimit(1)
-                        if !e.icon.isEmpty { Text(e.icon).font(.system(size: mini ? 9 : 14)) }
-                    }
-                    Spacer(minLength: 2)
-                    // 数字块贴右缘：纯数字款（图3左）无「天」格；带天款（图3右）数字+天分色格
-                    Text(daysText(e.days)).font(.system(size: mini ? 14 : 20, weight: .bold)).foregroundColor(.white)
-                        .frame(minWidth: mini ? 34 : 52, alignment: .center)
-                        .padding(.vertical, mini ? 2 : 5)
+        // 按容器高度等比缩放，跟桌面小组件同一套比例，避免列表里显得偏小
+        GeometryReader { g in
+            let count = min(3, evs.count)
+            let rows = max(1, count)
+            let pad = g.size.height * 0.055
+            let spacing = g.size.height * 0.045
+            let rowH = (g.size.height - pad * 2 - spacing * CGFloat(rows - 1)) / CGFloat(rows)
+            let blockH = rowH * 0.62
+            VStack(spacing: spacing) {
+                ForEach(0..<count, id: \.self) { i in
+                    let e = evs[i]
+                    let base = i < 2 ? wc(t.skin.hot) : wc(t.skin.far)
+                    HStack(spacing: 4) {
+                        HStack(spacing: 3) {
+                            Text(e.title).font(.system(size: rowH * 0.34, weight: .semibold)).foregroundColor(wc(t.skin.ink)).lineLimit(1)
+                            if !e.icon.isEmpty { Text(e.icon).font(.system(size: rowH * 0.30)) }
+                        }
+                        Spacer(minLength: 2)
+                        // 数字块贴右缘：蓝色近事件显示「天」，橘红远事件（超一年）显示「年」；纯数字款不显示单位
+                        let p = dayParts(e.days)
+                        HStack(alignment: .bottom, spacing: 1) {
+                            Text(p.num).font(.system(size: rowH * 0.42, weight: .bold)).foregroundColor(.white).lineLimit(1)
+                            if withTian {
+                                Text(p.unit).font(.system(size: rowH * 0.20, weight: .semibold))
+                                    .foregroundColor(.white.opacity(0.94)).padding(.bottom, rowH * 0.05)
+                            }
+                        }
+                        .frame(height: blockH)
+                        .padding(.horizontal, rowH * 0.2)
                         .background(base)
-                    .clipShape(RoundedRectangle(cornerRadius: mini ? 6 : 7))
+                        .clipShape(RoundedRectangle(cornerRadius: 7))
+                    }
+                    .padding(.horizontal, g.size.height * 0.05)
+                    .frame(height: rowH)
+                    .background(wc(t.skin.rowBg))
+                    .clipShape(RoundedRectangle(cornerRadius: 9))
                 }
-                .padding(.horizontal, mini ? 6 : 10).frame(height: mini ? 28 : 42)
-                .background(wc(t.skin.rowBg)).clipShape(RoundedRectangle(cornerRadius: mini ? 8 : 9))
             }
-            Spacer(minLength: 0)
+            .padding(pad)
+            .frame(width: g.size.width, height: g.size.height)
         }
-        .padding(mini ? 5 : 9)
     }
 }
 
@@ -437,7 +463,8 @@ private struct PicturePanel: View {
                         HStack {
                             Text(e.title).font(.system(size: mini ? 8 : 11)).foregroundColor(wc(t.skin.ink)).lineLimit(1)
                             Spacer()
-                            Text("\(e.days)天").font(.system(size: mini ? 9 : 12, weight: .bold)).foregroundColor(wc(t.skin.ink))
+                            let p = dayParts(e.days)
+                            Text(p.num + p.unit).font(.system(size: mini ? 9 : 12, weight: .bold)).foregroundColor(wc(t.skin.ink))
                         }
                         .padding(.horizontal, mini ? 5 : 10).padding(.vertical, mini ? 2 : 5)
                         .background(wc(t.skin.rowBg)).clipShape(RoundedRectangle(cornerRadius: 8))
@@ -459,29 +486,42 @@ private struct ListLargePanel: View {
     let mini: Bool
 
     var body: some View {
-        VStack(spacing: 0) {
-            let now = Date()
-            Text("\(Calendar(identifier: .gregorian).component(.month, from: now))月\(Calendar(identifier: .gregorian).component(.day, from: now))日 \(weekName(weekdayIndex(now)))")
-                .font(.system(size: mini ? 9 : 12, weight: .semibold)).foregroundColor(wc(t.skin.chipOnInk))
-                .frame(maxWidth: .infinity).padding(.vertical, mini ? 3 : 6)
-                .background(wc(t.skin.bgAccent))
-            VStack(spacing: mini ? 2 : 4) {
-                ForEach(0..<min(5, evs.count), id: \.self) { i in
+        GeometryReader { g in
+            let count = min(5, evs.count)
+            let rows = max(1, count)
+            let pad = g.size.height * 0.06
+            let headerH = g.size.height * 0.135
+            let spacing = g.size.height * 0.02
+            let rowH = (g.size.height - pad * 2 - headerH - spacing * CGFloat(rows - 1)) / CGFloat(rows)
+            VStack(spacing: spacing) {
+                let now = Date()
+                Text("\(Calendar(identifier: .gregorian).component(.month, from: now))月\(Calendar(identifier: .gregorian).component(.day, from: now))日 \(weekName(weekdayIndex(now)))")
+                    .font(.system(size: headerH * 0.46, weight: .semibold)).foregroundColor(wc(t.skin.chipOnInk))
+                    .frame(maxWidth: .infinity).frame(height: headerH)
+                    .background(wc(t.skin.bgAccent)).clipShape(RoundedRectangle(cornerRadius: 8))
+                ForEach(0..<count, id: \.self) { i in
                     let e = evs[i]
-                    HStack {
-                        Text("\(e.title) \(e.icon)").font(.system(size: mini ? 8 : 11, weight: .semibold)).foregroundColor(wc(t.skin.ink)).lineLimit(1)
+                    HStack(spacing: 6) {
+                        Text("\(e.title) \(e.icon)").font(.system(size: rowH * 0.32, weight: .semibold)).foregroundColor(wc(t.skin.ink)).lineLimit(1)
                         Spacer(minLength: 2)
-                        Text(daysText(e.days)).font(.system(size: mini ? 11 : 16, weight: .bold)).foregroundColor(.white)
-                            .frame(minWidth: mini ? 22 : 34, alignment: .center)
-                            .padding(.horizontal, mini ? 4 : 8).padding(.vertical, mini ? 1 : 3)
-                            .background(i < 3 ? wc(t.skin.hot) : wc(t.skin.far)).clipShape(RoundedRectangle(cornerRadius: 6))
+                        let p = dayParts(e.days)
+                        HStack(alignment: .bottom, spacing: 1) {
+                            Text(p.num).font(.system(size: rowH * 0.36, weight: .bold)).foregroundColor(.white).lineLimit(1)
+                            Text(p.unit).font(.system(size: rowH * 0.18, weight: .semibold))
+                                .foregroundColor(.white.opacity(0.94)).padding(.bottom, rowH * 0.04)
+                        }
+                        .frame(height: rowH * 0.62)
+                        .padding(.horizontal, rowH * 0.25)
+                        .background(i < 3 ? wc(t.skin.hot) : wc(t.skin.far))
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
                     }
-                    .padding(.horizontal, mini ? 4 : 8).padding(.vertical, mini ? 2 : 5)
-                    .background(wc(t.skin.rowBg)).clipShape(RoundedRectangle(cornerRadius: 8))
+                    .padding(.horizontal, g.size.height * 0.04)
+                    .frame(height: rowH)
+                    .background(wc(t.skin.rowBg)).clipShape(RoundedRectangle(cornerRadius: rowH * 0.2))
                 }
-                Spacer(minLength: 0)
             }
-            .padding(mini ? 5 : 10)
+            .padding(pad)
+            .frame(width: g.size.width, height: g.size.height)
         }
     }
     private func weekName(_ i: Int) -> String { ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"][max(0, min(6, i))] }
