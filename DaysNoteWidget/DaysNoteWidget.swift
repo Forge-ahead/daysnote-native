@@ -67,8 +67,10 @@ struct HolidayCountdown: Codable, Equatable {
 
 // MARK: - 公共工具
 /// 主题色覆盖：用户自定义了就用自定义色，否则沿用模板默认色。
+/// 只接受合法 #RRGGBB，避免旧缓存里异常字符串被当成 0x000000 渲染成纯黑。
 private func themedColor(_ override: String?, _ fallback: String) -> Color {
-    guard let s = override, !s.isEmpty else { return Color(hexW: fallback) }
+    guard let s = override, !s.isEmpty, s.hasPrefix("#"), s.count == 7,
+          Int(s.dropFirst(), 16) != nil else { return Color(hexW: fallback) }
     return Color(hexW: s)
 }
 private func daysText(_ e: WidgetEvent) -> String { daysText(e.days) }
@@ -241,7 +243,8 @@ private struct PictureTealLargeView: View {
                     }
                     .padding(.horizontal, 10)
                     .frame(height: rowH)
-                    .background(ink.opacity(0.18)).clipShape(RoundedRectangle(cornerRadius: rowH * 0.2))
+                    // 卡片底色固定半透明白，不能跟随文字色：用户设深色字体时若用 ink.opacity 会把卡片染黑。
+                    .background(Color.white.opacity(0.26)).clipShape(RoundedRectangle(cornerRadius: rowH * 0.2))
                 }
             }
             .padding(pad)
@@ -296,7 +299,8 @@ private struct ListBlueheadLargeView: View {
                     }
                     .padding(.horizontal, 8)
                     .frame(height: rowH)
-                    .background(ink.opacity(0.07)).clipShape(RoundedRectangle(cornerRadius: rowH * 0.2))
+                    // 卡片底色固定浅灰，与文字色解耦，深色字体时不会发黑。
+                    .background(Color(hexW: "#f5f6f8")).clipShape(RoundedRectangle(cornerRadius: rowH * 0.2))
                 }
             }
             .padding(pad)
@@ -336,12 +340,14 @@ private struct GridRoseView: View {
             HStack { Spacer(); Text(daysText(ev)).font(.system(size: cardH * 0.30, weight: .bold)).foregroundColor(ink) }
         }
         .padding(cardH * 0.10).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .background(LinearGradient(gradient: Gradient(colors: [ink.opacity(0.22), ink.opacity(0.16)]), startPoint: .topLeading, endPoint: .bottomTrailing))
+        // 卡片底色固定粉红渐变（与 v51 一致），不跟随文字色；深色字体时不会把卡片染黑。
+        .background(LinearGradient(gradient: Gradient(colors: [Color(hexW: "#f0a8b8"), Color(hexW: "#e896ab")]), startPoint: .topLeading, endPoint: .bottomTrailing))
         .clipShape(RoundedRectangle(cornerRadius: cardH * 0.14))
     }
     var body: some View {
         let bg = themedColor(theme.bg, "#fbedef")
-        let ink = themedColor(theme.ink, "#a05a68")
+        // 卡片底色是粉红，默认文字用白色才清晰；v53 误改成暗红，深色字压粉底会发虚。
+        let ink = themedColor(theme.ink, "#ffffff")
         return GeometryReader { g in
             let H = g.size.height
             let outerPad = H * 0.055
@@ -423,7 +429,8 @@ private struct SimpleListView: View {
                     }
                     .padding(.horizontal, medium ? 10 : 8)
                     .frame(height: rowH)
-                    .background(ink.opacity(0.06)).clipShape(RoundedRectangle(cornerRadius: medium ? 9 : 8))
+                    // 卡片底色固定白色，与文字色解耦，深色字体时不会发黑。
+                    .background(Color.white).clipShape(RoundedRectangle(cornerRadius: medium ? 9 : 8))
                 }
             }
             .padding(pad)
