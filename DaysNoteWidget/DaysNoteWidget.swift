@@ -51,10 +51,11 @@ struct HolidayCountdown: Codable, Equatable {
 // MARK: - 公共工具
 private func daysText(_ e: WidgetEvent) -> String { daysText(e.days) }
 private func daysText(_ n: Int) -> String { n > 365 ? String(format: "%.2f年", Double(n) / 365) : "\(n)" }
-/// 数字与单位拆分：大于一年换算成「年」，否则显示「天」。
+/// 数字与单位拆分：useYear=true 时大于一年换算成「年」，否则一律按「天」显示原始天数。
 /// 蓝色块（近）显示天数配「天」；橘红色块（远，超过一年）显示年数配「年」。
-private func dayParts(_ n: Int) -> (num: String, unit: String) {
-    if n > 365 { return (String(format: "%.2f", Double(n) / 365), "年") }
+/// 2×2 纯数字款传 useYear=false，始终用天数计数，不出现「年」。
+private func dayParts(_ n: Int, useYear: Bool = true) -> (num: String, unit: String) {
+    if useYear && n > 365 { return (String(format: "%.2f", Double(n) / 365), "年") }
     return ("\(n)", "天")
 }
 private func shortDate(_ iso: String) -> String {
@@ -104,13 +105,14 @@ private func holidayDemos() -> [WidgetEvent] {
 private struct DayBadge: View {
     let days: Int
     let showUnit: Bool
+    var useYear: Bool = true
     let base: Color
     let numSize: CGFloat
     let unitSize: CGFloat
     let height: CGFloat
     let radius: CGFloat
     var body: some View {
-        let p = dayParts(days)
+        let p = dayParts(days, useYear: useYear)
         return HStack(alignment: .bottom, spacing: 1) {
             Text(p.num).font(.system(size: numSize, weight: .bold)).foregroundColor(.white).lineLimit(1)
             if showUnit {
@@ -366,13 +368,14 @@ private struct SimpleListView: View {
                     let base = i < 2 ? Color(hexW: "#4a90d9") : Color(hexW: "#f0a04b")
                     HStack(spacing: 4) {
                         HStack(spacing: 3) {
-                            Text(ev.title).font(.system(size: rowH * 0.34, weight: .semibold)).foregroundColor(Color(hexW: "#4a4844")).lineLimit(1)
-                            if !ev.icon.isEmpty { Text(ev.icon).font(.system(size: rowH * 0.30)) }
+                            // 2×2 纯数字款：缩小标题字号，不显示图标，给数字留足空间
+                            Text(ev.title).font(.system(size: rowH * (medium ? 0.34 : 0.26), weight: .semibold)).foregroundColor(Color(hexW: "#4a4844")).lineLimit(1)
+                            if medium && !ev.icon.isEmpty { Text(ev.icon).font(.system(size: rowH * 0.30)) }
                         }
                         Spacer(minLength: 2)
-                        // 数字块贴右缘：蓝色近事件显示「天」，橘红远事件（超一年）显示「年」；纯数字款不显示单位
-                        DayBadge(days: ev.days, showUnit: withTian, base: base,
-                                 numSize: rowH * 0.42, unitSize: rowH * 0.20,
+                        // 2×2 纯数字款不换算成年：始终按「天」显示原始天数
+                        DayBadge(days: ev.days, showUnit: withTian, useYear: medium, base: base,
+                                 numSize: rowH * (medium ? 0.42 : 0.36), unitSize: rowH * 0.20,
                                  height: blockH, radius: medium ? 7 : 6)
                     }
                     .padding(.horizontal, medium ? 10 : 8)
