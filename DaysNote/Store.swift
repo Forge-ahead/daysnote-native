@@ -44,6 +44,10 @@ enum Persistence {
         (groupURL ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0])
             .appendingPathComponent("daysnote-widget.json")
     }
+    static var widgetThemesURL: URL {
+        (groupURL ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0])
+            .appendingPathComponent("daysnote-widget-themes.json")
+    }
 
     static func load<T: Decodable>(_ type: T.Type, from url: URL) -> T? {
         guard let data = try? Data(contentsOf: url) else { return nil }
@@ -95,6 +99,7 @@ class Store: ObservableObject {
     @Published var events: [EventItem] = []
     @Published var settings: AppSettings = .default
     @Published var bindings: [String: WidgetBinding] = [:]
+    @Published var widgetThemes: [String: WidgetTheme] = [:]
     @Published var trash: [TrashItem] = []
     @Published var remoteTrash: [[String: Any]] = []
     @Published var remoteDetails: [String: [String: Any]] = [:]
@@ -135,8 +140,11 @@ class Store: ObservableObject {
                 return SyncBaseItem(hash: h, updatedAt: t)
             }
         }
+        widgetThemes = Persistence.load([String: WidgetTheme].self, from: Persistence.widgetThemesURL) ?? [:]
         tombstones = (Persistence.loadJSON(Persistence.tombURL)?["ids"] as? [String]) ?? []
         trash = Persistence.load([TrashItem].self, from: Persistence.trashURL) ?? []
+        // 启动即刷新一次组件数据（带上主题），避免旧缓存缺字段导致组件显示示例
+        syncWidgetData()
         // 一次性迁移：内置事件「在一起」默认显示 正数 + 倒数
         if !UserDefaults.standard.bool(forKey: "daysnote.migrate.togetherBoth.v1") {
             if let i = events.firstIndex(where: { $0.id == "event:bi:together" && $0.displayMode != .both }) {
@@ -160,6 +168,12 @@ class Store: ObservableObject {
         syncWidgetData()
     }
     func saveTombstones() { Persistence.saveJSON(["ids": tombstones], to: Persistence.tombURL) }
+    func saveWidgetTheme(_ theme: WidgetTheme, for id: String) {
+        if theme.isDefault { widgetThemes.removeValue(forKey: id) }
+        else { widgetThemes[id] = theme }
+        Persistence.save(widgetThemes, to: Persistence.widgetThemesURL)
+        syncWidgetData()
+    }
     func saveBase() {
         let obj: [String: Any] = syncBase.mapValues { ["hash": $0.hash, "updatedAt": $0.updatedAt] }
         Persistence.saveJSON(obj, to: Persistence.syncBaseURL)
@@ -432,7 +446,7 @@ class Store: ObservableObject {
             let info = DateUtils.dayInfo(ev)
             return WidgetEvent(title: ev.title, icon: ev.icon, date: ev.date,
                                days: info.days, dir: info.dir, color: ev.color)
-        }, holiday: holiday, updatedAt: Date().timeIntervalSince1970)
+        }, holiday: holiday, themes: widgetThemes, updatedAt: Date().timeIntervalSince1970)
         Persistence.save(payload, to: Persistence.widgetURL)
         // 关键：写入数据后必须通知 WidgetKit 重新拉取时间线，否则小组件不会更新
         WidgetCenter.shared.reloadAllTimelines()
