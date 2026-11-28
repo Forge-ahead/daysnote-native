@@ -192,10 +192,15 @@ enum Festivals {
     /// 内置节日分类 id：作为虚拟事件供组件绑定，不写入用户事件列表。
     static let categoryId = "cat:festivals"
 
+    /// 节日虚拟事件缓存：组件同步每次 save() 都会调用这里，农历换算是 Calendar 重活，
+    /// 缓存后同一年只算一次，避免频繁点击（增删改事件）时的卡顿。
+    private static var festivalCache: (year: Int, events: [EventItem])?
+
     /// 生成当年与次年的节日虚拟事件，供组件「绑定事件 / 选分类」使用。
     static func festivalEvents() -> [EventItem] {
         let cal = Calendar(identifier: .gregorian)
         let thisYear = cal.component(.year, from: Date())
+        if let cached = festivalCache, cached.year == thisYear { return cached.events }
         var out: [EventItem] = []
         for y in thisYear...(thisYear + 1) {
             for (i, f) in forYear(y).enumerated() {
@@ -213,6 +218,7 @@ enum Festivals {
                 ))
             }
         }
+        festivalCache = (thisYear, out)
         return out
     }
 
