@@ -428,62 +428,73 @@ private struct HolidayView: View {
 
     var body: some View {
         GeometryReader { g in
+            // 字号按容器高度等比，填满组件空隙（与 App 内预览同一套比例）
+            let H = g.size.height
+            let titleF = H * 0.085
+            let bigF = H * 0.28
+            let chipF = H * 0.065
+            let weekF = H * 0.065
+            let rowF = H * 0.078
+            let pad = H * 0.06
             HStack(spacing: 0) {
-                VStack(alignment: .leading, spacing: 3) {
+                VStack(alignment: .leading, spacing: H * 0.022) {
                     if let h = entry.payload.holiday {
-                        Text(h.inProgress ? "\(h.name) · 假期中" : "距离\(h.name)").font(.system(size: 11, weight: .bold)).foregroundColor(brand)
+                        Text(h.inProgress ? "\(h.name) · 假期中" : "距离\(h.name)")
+                            .font(.system(size: titleF, weight: .bold)).foregroundColor(brand).lineLimit(1)
                         HStack(alignment: .firstTextBaseline, spacing: 2) {
                             // 假期中显示整个假期天数，不再只显示剩余 1 天
-                            Text(h.inProgress ? "\(h.holidayDays)" : "\(h.daysLeft)").font(.system(size: 34, weight: .bold)).foregroundColor(brand)
-                            Text("天").font(.system(size: 11)).foregroundColor(brand)
+                            Text(h.inProgress ? "\(h.holidayDays)" : "\(h.daysLeft)").font(.system(size: bigF, weight: .bold)).foregroundColor(brand)
+                            Text("天").font(.system(size: titleF * 0.8)).foregroundColor(brand)
                         }
                         if !h.rangeText.isEmpty {
-                            HStack(spacing: 3) {
-                                Text("休").font(.system(size: 8, weight: .bold)).foregroundColor(.white)
-                                    .padding(.horizontal, 3).padding(.vertical, 1).background(chipOn).clipShape(Capsule())
+                            HStack(spacing: H * 0.02) {
+                                Text("休").font(.system(size: chipF, weight: .bold)).foregroundColor(.white)
+                                    .padding(.horizontal, H * 0.02).padding(.vertical, H * 0.008).background(chipOn).clipShape(Capsule())
                                 // 显示完整放假区间（如 01/01 - 01/03）
-                                Text(h.rangeText).font(.system(size: 9)).foregroundColor(ink).lineLimit(1)
+                                Text(h.rangeText).font(.system(size: chipF * 1.1)).foregroundColor(ink).lineLimit(1)
                             }
                         }
                     } else {
-                        Text("距离下一个假期").font(.system(size: 11, weight: .bold)).foregroundColor(brand)
-                        Text("—").font(.system(size: 32, weight: .bold)).foregroundColor(brand)
-                        Text("每月更新").font(.system(size: 9)).foregroundColor(inkSoft)
+                        Text("距离下一个假期").font(.system(size: titleF, weight: .bold)).foregroundColor(brand)
+                        Text("—").font(.system(size: bigF * 0.92, weight: .bold)).foregroundColor(brand)
+                        Text("每月更新").font(.system(size: chipF)).foregroundColor(inkSoft)
                     }
                     Spacer(minLength: 1)
                     HStack(spacing: 0) {
                         ForEach(0..<7, id: \.self) { i in
-                            Text(week[i]).font(.system(size: 8, weight: i == todayWeek() ? .bold : .regular))
-                                .frame(maxWidth: .infinity).padding(.vertical, 2)
+                            Text(week[i]).font(.system(size: weekF, weight: i == todayWeek() ? .bold : .regular))
+                                .frame(maxWidth: .infinity).padding(.vertical, H * 0.018)
                                 .background(i == todayWeek() ? chipOn : Color.clear)
                                 .foregroundColor(i == todayWeek() ? Color.white : inkSoft)
                                 .clipShape(Circle())
                         }
                     }
                 }
-                .padding(9).frame(width: g.size.width * 0.42, alignment: .leading)
+                .padding(pad).frame(width: g.size.width * 0.42, alignment: .leading)
                 .background(LinearGradient(gradient: Gradient(colors: [bgAccent, bg]), startPoint: .topLeading, endPoint: .bottomTrailing))
 
                 VStack(spacing: 0) {
                     // 优先用户绑定事件；为空时显示节日示例清单（与原图一致）
                     let evs = entry.payload.events.isEmpty ? holidayDemos() : Array(entry.payload.events.prefix(4))
-                    ForEach(0..<min(4, evs.count), id: \.self) { i in
+                    let rows = max(1, min(4, evs.count))
+                    ForEach(0..<rows, id: \.self) { i in
                         let ev = evs[i]
-                        HStack(spacing: 4) {
-                            Text(ev.title + "  " + shortDate(ev.date)).font(.system(size: 10)).foregroundColor(ink).lineLimit(1)
+                        HStack(spacing: H * 0.025) {
+                            Text(ev.title + "  " + shortDate(ev.date)).font(.system(size: rowF)).foregroundColor(ink).lineLimit(1)
                             if ev.title == "春节" || ev.title == "除夕" {
-                                Text("休").font(.system(size: 7, weight: .bold)).foregroundColor(Color(hexW: "#5c8a4a"))
-                                    .padding(.horizontal, 2).background(Color(hexW: "#e3ecdf")).clipShape(Capsule())
+                                Text("休").font(.system(size: chipF * 0.85, weight: .bold)).foregroundColor(Color(hexW: "#5c8a4a"))
+                                    .padding(.horizontal, H * 0.015).background(Color(hexW: "#e3ecdf")).clipShape(Capsule())
                             }
                             Spacer(minLength: 2)
-                            Text("\(ev.days)天").font(.system(size: 11, weight: .bold)).foregroundColor(ink)
+                            Text("\(ev.days)天").font(.system(size: rowF, weight: .bold)).foregroundColor(ink)
                         }
-                        .padding(.vertical, 6)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: (H - pad * 2) / CGFloat(rows))
                         .overlay(Rectangle().fill(Color.black.opacity(0.06)).frame(height: 1), alignment: .bottom)
                     }
                     Spacer(minLength: 0)
                 }
-                .padding(.horizontal, 9).frame(width: g.size.width * 0.58)
+                .padding(.horizontal, pad).frame(width: g.size.width * 0.58)
                 .background(Color.white)
             }
         }
