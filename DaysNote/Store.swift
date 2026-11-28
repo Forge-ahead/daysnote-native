@@ -78,6 +78,7 @@ enum Seed {
             Category(id: "cat:misc", name: "杂事", color: Constants.categoryColors[1], order: 1, updatedAt: now),
             Category(id: "cat:anniv", name: "周年纪念", color: Constants.categoryColors[2], order: 2, updatedAt: now),
             Category(id: "cat:record", name: "事件记录", color: Constants.categoryColors[3], order: 3, updatedAt: now),
+            Category(id: Festivals.categoryId, name: "节日", color: "#e8786d", order: 4, builtin: true, updatedAt: now),
         ]
     }
     static func events() -> [EventItem] {
@@ -152,6 +153,12 @@ class Store: ObservableObject {
                 save()
             }
             UserDefaults.standard.set(true, forKey: "daysnote.migrate.togetherBoth.v1")
+        }
+        // 迁移：补上内置「节日」分类（老用户数据里没有）
+        if !categories.contains(where: { $0.id == Festivals.categoryId }) {
+            categories.append(Category(id: Festivals.categoryId, name: "节日", color: "#e8786d",
+                                       order: categories.count, builtin: true, updatedAt: nowMs()))
+            save()
         }
         // 清理 v28 遗留的内置事件删除标记，但保留伪事件 yearleft
         let cleaned = tombstones.filter { !["event:bi:birthday", "event:bi:marriage", "event:bi:joinlianjia"].contains($0) }
@@ -457,16 +464,25 @@ class Store: ObservableObject {
 
 enum WidgetResolver {
     static func resolve(bindings: [String: WidgetBinding], events: [EventItem], categories: [Category]) -> [EventItem] {
-        let all = bindings.values.first
-        let unbound = all == nil || (all!.eventIds.isEmpty && all!.categoryIds.isEmpty)
+        // 所有组件共享同一份 payload，合并各组件的绑定选择
+        let categoryIds = Array(Set(bindings.values.flatMap { $0.categoryIds }))
+        let eventIds = Array(Set(bindings.values.flatMap { $0.eventIds }))
+        let wantsFestivals = categoryIds.contains(Festivals.categoryId) || eventIds.contains { $0.hasPrefix("festival:") }
+        let festivalPool = wantsFestivals ? Festivals.festivalEvents() : []
+        let pool = events + festivalPool
         var picked: [EventItem]
-        if unbound || (all?.mode ?? "category") == "category" {
-            let ids = all?.categoryIds ?? []
-            if ids.isEmpty || ids.contains("cat:all") { picked = events }
-            else { let set = Set(ids); picked = events.filter { set.contains($0.categoryId) } }
+        if eventIds.contains(where: { !$0.hasPrefix("festival:") }) {
+            // 指定事件模式：用户事件 + 单独勾选的节日
+            let set = Set(eventIds)
+            picked = pool.filter { set.contains($0.id) }
+            if categoryIds.contains(Festivals.categoryId) { picked += festivalPool }
+        } else if categoryIds.isEmpty {
+            picked = events
+        } else if categoryIds.contains("cat:all") {
+            picked = pool
         } else {
-            let set = Set(all?.eventIds ?? [])
-            picked = events.filter { set.contains($0.id) }
+            let set = Set(categoryIds)
+            picked = pool.filter { set.contains($0.categoryId) }
         }
         var seen = Set<String>()
         picked = picked.filter { seen.insert($0.id).inserted }
