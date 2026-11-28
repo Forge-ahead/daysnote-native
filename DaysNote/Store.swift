@@ -116,6 +116,7 @@ class Store: ObservableObject {
 
     var syncBase: SyncBase = [:]
     var tombstones: [String] = []
+    private var widgetReloadWork: DispatchWorkItem?
     private var engine: SyncEngine { SyncEngine(settings: settings) }
 
     init() {
@@ -144,13 +145,14 @@ class Store: ObservableObject {
         widgetThemes = Persistence.load([String: WidgetTheme].self, from: Persistence.widgetThemesURL) ?? [:]
         tombstones = (Persistence.loadJSON(Persistence.tombURL)?["ids"] as? [String]) ?? []
         trash = Persistence.load([TrashItem].self, from: Persistence.trashURL) ?? []
-        // 启动即刷新一次组件数据（带上主题），避免旧缓存缺字段导致组件显示示例
-        syncWidgetData()
+        // 一次性迁移与启动刷新合并为「一次」写盘 + 一次组件 reload。
+        // 原来每个迁移分支各调一次 save()，save() 又会 syncWidgetData()，启动连刷 3 次导致卡顿。
+        var migrated = false
         // 一次性迁移：内置事件「在一起」默认显示 正数 + 倒数
         if !UserDefaults.standard.bool(forKey: "daysnote.migrate.togetherBoth.v1") {
             if let i = events.firstIndex(where: { $0.id == "event:bi:together" && $0.displayMode != .both }) {
                 events[i].displayMode = .both
-                save()
+                migrated = true
             }
             UserDefaults.standard.set(true, forKey: "daysnote.migrate.togetherBoth.v1")
         }
@@ -158,8 +160,9 @@ class Store: ObservableObject {
         if !categories.contains(where: { $0.id == Festivals.categoryId }) {
             categories.append(Category(id: Festivals.categoryId, name: "节日", color: "#e8786d",
                                        order: categories.count, builtin: true, updatedAt: nowMs()))
-            save()
+            migrated = true
         }
+        if migrated { save() } else { syncWidgetData() }
         // 清理 v28 遗留的内置事件删除标记，但保留伪事件 yearleft
         let cleaned = tombstones.filter { !["event:bi:birthday", "event:bi:marriage", "event:bi:joinlianjia"].contains($0) }
         var final = cleaned
@@ -455,8 +458,11 @@ class Store: ObservableObject {
                                days: info.days, dir: info.dir, color: ev.color)
         }, holiday: holiday, themes: widgetThemes, updatedAt: Date().timeIntervalSince1970)
         Persistence.save(payload, to: Persistence.widgetURL)
-        // 关键：写入数据后必须通知 WidgetKit 重新拉取时间线，否则小组件不会更新
-        WidgetCenter.shared.reloadAllTimelines()
+        // 写入后通知 WidgetKit 重拉时间线；做 0.3s 防抖，连续点击/批量改动只重载一次，避免卡顿。
+        widgetReloadWork?.cancel()
+        let work = DispatchWorkItem { WidgetCenter.shared.reloadAllTimelines() }
+        widgetReloadWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: work)
     }
 }
 
