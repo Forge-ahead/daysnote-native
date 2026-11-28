@@ -43,16 +43,17 @@ struct HomeView: View {
                 .padding(.horizontal, 4)
 
                 // 今年剩余：动态 hero，跨年自动切换
+                // 卡片底色是固定浅粉，文字必须用固定深色，夜间模式才不会「浅字压浅底」发虚。
                 HStack(spacing: 12) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(DateUtils.formatDays(DateUtils.yearRemaining())).font(.system(size: 42, weight: .bold))
-                        Text("DAYS").font(.system(size: 10, weight: .semibold)).opacity(0.7)
+                        Text("DAYS").font(.system(size: 10, weight: .semibold)).opacity(0.85)
                     }
                     .frame(width: 88)
                     VStack(alignment: .leading, spacing: 6) {
                         Text("今年剩余").font(.system(size: 18, weight: .semibold))
                         Text(DateUtils.formatCN("\(Calendar(identifier: .gregorian).component(.year, from: Date()))-12-31"))
-                            .font(.system(size: 11)).opacity(0.75)
+                            .font(.system(size: 11)).opacity(0.9)
                     }
                     Spacer()
                     Text("🎆").font(.system(size: 34))
@@ -60,7 +61,7 @@ struct HomeView: View {
                 .padding(18)
                 .background(Color(hex: "#f3b8c2"))
                 .clipShape(RoundedRectangle(cornerRadius: 18))
-                .foregroundColor(Theme.ink)
+                .foregroundColor(Theme.inkOnLightCard)
 
                 group("倒数 · \(future.count)", items: future, folded: $foldFuture)
                 group("正数 · \(past.count)", items: past, folded: $foldPast)
@@ -91,18 +92,19 @@ struct HomeView: View {
                 Text(ev.icon).font(.system(size: 26)).frame(width: 34)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(ev.title).font(.system(size: 16, weight: .semibold)).lineLimit(1)
-                    Text(DateUtils.formatCN(ev.date)).font(.system(size: 11)).foregroundColor(Theme.muted).lineLimit(1)
+                    // 事件卡片底色固定为用户选的浅色（cardColors 全是浅色），副标题用固定中深色。
+                    Text(DateUtils.formatCN(ev.date)).font(.system(size: 11)).foregroundColor(Theme.mutedOnLightCard).lineLimit(1)
                 }
                 Spacer()
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text(days > 365 ? "YEARS" : "DAYS").font(.system(size: 9, weight: .semibold)).opacity(0.6)
+                    Text(days > 365 ? "YEARS" : "DAYS").font(.system(size: 9, weight: .semibold)).opacity(0.85)
                     Text(DateUtils.formatDays(days)).font(.system(size: 26, weight: .bold))
                 }
             }
             .padding(14)
             .background(Color(hex: ev.color))
             .clipShape(RoundedRectangle(cornerRadius: 16))
-            .foregroundColor(Theme.ink)
+            .foregroundColor(Theme.inkOnLightCard)
         }
         .buttonStyle(.plain)
         .contextMenu {
