@@ -124,8 +124,9 @@ struct TimelineView: View {
                     .onAppear {
                         guard !didInit else { return }
                         didInit = true
+                        // 打开即定位到「今天」所在行：无动画、不显示滚动过程
                         DispatchQueue.main.async {
-                            withAnimation { proxy.scrollTo("year-\(thisYear)", anchor: .top) }
+                            proxy.scrollTo("today-\(self.thisYear)", anchor: .center)
                         }
                     }
                 }
