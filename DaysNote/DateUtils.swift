@@ -184,9 +184,37 @@ enum Festivals {
         ("中秋节", 8, 15, "🥮"), ("重阳节", 9, 9, "🍂"), ("腊八节", 12, 8, "🥣"),
     ]
     static let legalList: [(String, Int, Int, String)] = [
-        ("元旦", 1, 1, "🎍"), ("情人节", 2, 14, "❤️"), ("植树节", 3, 12, "🌳"),
-        ("儿童节", 6, 1, "🎈"), ("圣诞节", 12, 25, "🎄"),
+        ("元旦", 1, 1, "🎍"), ("情人节", 2, 14, "❤️"), ("妇女节", 3, 8, "🌸"),
+        ("植树节", 3, 12, "🌳"), ("清明节", 4, 4, "🌿"), ("劳动节", 5, 1, "🛠️"),
+        ("儿童节", 6, 1, "🎈"), ("国庆节", 10, 1, "🇨🇳"), ("圣诞节", 12, 25, "🎄"),
     ]
+
+    /// 内置节日分类 id：作为虚拟事件供组件绑定，不写入用户事件列表。
+    static let categoryId = "cat:festivals"
+
+    /// 生成当年与次年的节日虚拟事件，供组件「绑定事件 / 选分类」使用。
+    static func festivalEvents() -> [EventItem] {
+        let cal = Calendar(identifier: .gregorian)
+        let thisYear = cal.component(.year, from: Date())
+        var out: [EventItem] = []
+        for y in thisYear...(thisYear + 1) {
+            for (i, f) in forYear(y).enumerated() {
+                out.append(EventItem(
+                    id: "festival:\(y):\(f.name)",
+                    title: f.name,
+                    date: DateUtils.toISO(f.date),
+                    lunar: f.kind == "lunar",
+                    categoryId: categoryId,
+                    icon: f.icon,
+                    color: f.kind == "lunar" ? "#c98a5b" : "#5b8f84",
+                    note: "", order: Int64(y * 1000 + i), repeatMode: .none,
+                    showInTimeline: false, displayMode: .countdown,
+                    createdAt: 0, updatedAt: 0
+                ))
+            }
+        }
+        return out
+    }
 
     static func forYear(_ year: Int) -> [Festival] {
         var out: [Festival] = []
