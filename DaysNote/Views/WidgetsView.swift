@@ -278,22 +278,24 @@ private struct WidgetPreviewView: View {
 
     var body: some View {
         // 把用户配色合并进模板皮肤，App 内预览与桌面组件用同一套颜色
-        let t = {
-            var x = t
-            x.skin = x.skin.overridden(by: theme)
-            return x
-        }()
+        let themed = themedTemplate()
         Group {
-            switch t.kind {
-            case "holiday": HolidayPanel(t: t, evs: evs, holiday: holiday, mini: mini)
-            case "simpleNumber": SimplePanel(t: t, evs: evs, mini: mini, withTian: false)
-            case "simple": SimplePanel(t: t, evs: evs, mini: mini, withTian: true)
-            case "grid": GridPanel(t: t, evs: evs, mini: mini)
-            case "picture": PicturePanel(t: t, evs: evs, mini: mini)
-            default: ListLargePanel(t: t, evs: evs, mini: mini)
+            switch themed.kind {
+            case "holiday": HolidayPanel(t: themed, evs: evs, holiday: holiday, mini: mini)
+            case "simpleNumber": SimplePanel(t: themed, evs: evs, mini: mini, withTian: false)
+            case "simple": SimplePanel(t: themed, evs: evs, mini: mini, withTian: true)
+            case "grid": GridPanel(t: themed, evs: evs, mini: mini)
+            case "picture": PicturePanel(t: themed, evs: evs, mini: mini)
+            default: ListLargePanel(t: themed, evs: evs, mini: mini)
             }
         }
-        .background(wc(t.skin.bg))
+        .background(wc(themed.skin.bg))
+    }
+
+    private func themedTemplate() -> WidgetTemplate {
+        var x = t
+        x.skin = x.skin.overridden(by: theme)
+        return x
     }
 }
 
