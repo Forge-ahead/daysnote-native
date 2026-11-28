@@ -118,10 +118,30 @@ struct WidgetEvent: Codable, Equatable {
     var color: String
 }
 
+/// 每款组件的自定义配色（nil = 沿用模板默认色）
+struct WidgetTheme: Codable, Equatable {
+    var bg: String?
+    var ink: String?
+    static let `default` = WidgetTheme(bg: nil, ink: nil)
+    var isDefault: Bool { (bg ?? "").isEmpty && (ink ?? "").isEmpty }
+}
+
 struct WidgetPayload: Codable {
     var events: [WidgetEvent]
     var holiday: HolidayCountdown?
+    var themes: [String: WidgetTheme]
     var updatedAt: TimeInterval
+    enum CodingKeys: String, CodingKey { case events, holiday, themes, updatedAt }
+    init(events: [WidgetEvent], holiday: HolidayCountdown?, themes: [String: WidgetTheme], updatedAt: TimeInterval) {
+        self.events = events; self.holiday = holiday; self.themes = themes; self.updatedAt = updatedAt
+    }
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        events = try c.decodeIfPresent([WidgetEvent].self, forKey: .events) ?? []
+        holiday = try c.decodeIfPresent(HolidayCountdown.self, forKey: .holiday)
+        themes = try c.decodeIfPresent([String: WidgetTheme].self, forKey: .themes) ?? [:]
+        updatedAt = try c.decodeIfPresent(TimeInterval.self, forKey: .updatedAt) ?? 0
+    }
 }
 
 struct HolidayCountdown: Codable, Equatable {
@@ -139,7 +159,7 @@ struct HolidayCountdown: Codable, Equatable {
 enum Constants {
     static let appGroup = "group.com.daysnote.app"
     static let schemaVersion = 7
-    static let appVersion = "3.2.0"
+    static let appVersion = "3.2.1"
     static let build = 31
     static let cardColors = ["#e3e9d5", "#dbe7f1", "#fbe0b8", "#f0c8c4", "#dfc8d1", "#c7ddd9", "#d7d2c4"]
     static let categoryColors = ["#f3b8c2", "#a8d3d2", "#e8786d", "#5bb894", "#f6cd6e", "#9fb8e8", "#c7a9dc"]
