@@ -13,10 +13,18 @@ struct EventEditor: View {
     @State private var color = Constants.cardColors[0]
     @State private var note = ""
     @State private var categoryId = "cat:all"
-    @State private var displayMode: CountMode = .countdown
+    // 新增事件默认为「正数」事件
+    @State private var displayMode: CountMode = .countup
     @State private var repeatMode: RepeatMode = .none
     @State private var showInTimeline = true
-    @State private var showIconPicker = false
+
+    // V31 同款：大量可选图标 + 允许直接输入任意 Emoji
+    private let iconOptions: [String] = [
+        "📌", "❤️", "💕", "💝", "💍", "🌹", "🎉", "🎊", "🎁", "🧧",
+        "🎂", "🍒", "🍀", "🌸", "⭐️", "☀️", "🌙", "🌍", "✈️", "🏠",
+        "🐱", "🐶", "🐾", "🦄", "🐼", "🐰", "👶", "🎓", "💼", "🕯️",
+        "🧦", "⏰", "📚", "🏖️", "🍎", "🎄", "🎈", "💐", "🔥", "✨"
+    ]
 
     private var isEdit: Bool { eventId != nil }
 
@@ -37,20 +45,26 @@ struct EventEditor: View {
                 // 信息区
                 SectionTitle(text: "信息")
                 CardPanel {
-                    HStack {
-                        Text("图标").font(.system(size: 14)).frame(width: 68, alignment: .leading)
-                        Button(action: { showIconPicker.toggle() }) {
-                            Text(icon).font(.system(size: 24)).frame(width: 40, height: 40)
-                                .background(Color(uiColor: .tertiarySystemBackground)).clipShape(RoundedRectangle(cornerRadius: 10))
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack {
+                            Text("图标").font(.system(size: 14)).frame(width: 68, alignment: .leading)
+                            TextField("可直接输入任意 Emoji，例如 🌙", text: $icon)
+                                .textFieldStyle(.roundedBorder)
+                                .font(.system(size: 15))
                         }
-                        Spacer()
-                    }
-                    if showIconPicker {
                         LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 8), spacing: 8) {
-                            ForEach(["📌","❤️","🍒","🎂","💍","🧧","🎊","🏠","🐱","🐶","👶","🎓","💼","✈️","🌍","⭐️","🎉","🎁","🌹","☀️"], id: \.self) { e in
-                                Button(action: { icon = e; showIconPicker = false }) { Text(e).font(.system(size: 22)) }
+                            ForEach(iconOptions, id: \.self) { e in
+                                Button(action: { icon = e }) {
+                                    Text(e).font(.system(size: 22))
+                                        .frame(maxWidth: .infinity, minHeight: 36)
+                                        .background(icon == e ? Color(hex: "#e6efe1") : Color(uiColor: .tertiarySystemBackground))
+                                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                                }
+                                .buttonStyle(.plain)
                             }
                         }
+                        Text("点选快速图标，或直接在上方输入任意 Emoji；留空保存时会自动使用 📌。")
+                            .font(.system(size: 11)).foregroundColor(Theme.muted)
                     }
                     Divider()
                     HStack {
@@ -132,15 +146,16 @@ struct EventEditor: View {
 
     private func save() {
         let iso = DateUtils.toISO(date)
+        let finalIcon = icon.trimmingCharacters(in: .whitespaces).isEmpty ? "📌" : icon
         if let id = eventId, var ev = store.events.first(where: { $0.id == id }) {
-            ev.title = title; ev.date = iso; ev.lunar = lunar; ev.icon = icon; ev.color = color
+            ev.title = title; ev.date = iso; ev.lunar = lunar; ev.icon = finalIcon; ev.color = color
             ev.note = note; ev.categoryId = categoryId; ev.displayMode = displayMode
             ev.repeatMode = repeatMode; ev.showInTimeline = showInTimeline
             store.updateEvent(id, patch: ev)
             onSaved(id)
         } else {
             let ev = EventItem(id: "", title: title, date: iso, lunar: lunar, categoryId: categoryId,
-                               icon: icon, color: color, note: note, order: nowMs(), repeatMode: repeatMode,
+                               icon: finalIcon, color: color, note: note, order: nowMs(), repeatMode: repeatMode,
                                showInTimeline: showInTimeline, displayMode: displayMode, createdAt: 0, updatedAt: 0)
             let saved = store.addEvent(ev)
             onSaved(saved.id)
