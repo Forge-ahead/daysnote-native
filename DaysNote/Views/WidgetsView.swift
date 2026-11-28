@@ -34,6 +34,18 @@ private struct WidgetSkin: Equatable {
     var far: String
     var chipOn: String
     var chipOnInk: String
+
+    /// 应用用户自定义主题：背景覆盖底色，字体色覆盖所有文字与品牌色。
+    func overridden(by theme: WidgetTheme?) -> WidgetSkin {
+        var s = self
+        if let bg = theme?.bg, !bg.isEmpty {
+            s.bg = bg; s.bgAccent = bg
+        }
+        if let ink = theme?.ink, !ink.isEmpty {
+            s.ink = ink; s.inkSoft = ink; s.brand = ink; s.chipOn = ink
+        }
+        return s
+    }
 }
 
 private struct WidgetTemplate: Identifiable, Equatable {
@@ -228,7 +240,7 @@ struct WidgetsView: View {
                         VStack(spacing: 0) {
                             Button(action: { selected = t }) {
                                 let ps = listPreviewSize(t.size)
-                                WidgetPreviewView(t: t, evs: boundWidgetEvents(t, store: store), holiday: store.holiday, mini: true)
+                                WidgetPreviewView(t: t, evs: boundWidgetEvents(t, store: store), holiday: store.holiday, mini: true, theme: store.widgetThemes[t.id])
                                     .frame(width: ps.width, height: ps.height)
                                     .clipShape(RoundedRectangle(cornerRadius: t.size == "small" ? 26 : 22))
                                     .shadow(color: .black.opacity(0.10), radius: 6, y: 3)
@@ -262,8 +274,15 @@ private struct WidgetPreviewView: View {
     let evs: [BoundEvent]
     let holiday: HolidayCountdown?
     let mini: Bool
+    let theme: WidgetTheme?
 
     var body: some View {
+        // 把用户配色合并进模板皮肤，App 内预览与桌面组件用同一套颜色
+        let t = {
+            var x = t
+            x.skin = x.skin.overridden(by: theme)
+            return x
+        }()
         Group {
             switch t.kind {
             case "holiday": HolidayPanel(t: t, evs: evs, holiday: holiday, mini: mini)
@@ -477,17 +496,17 @@ private struct GridPanel: View {
     private func card(_ i: Int, cardH: CGFloat) -> some View {
         if i < evs.count {
             let e = evs[i]
-            VStack(alignment: .leading, spacing: cardH * 0.03) {
+            VStack(alignment: .leading, spacing: cardH * 0.02) {
                 HStack(spacing: cardH * 0.04) {
-                    Text(e.icon).font(.system(size: cardH * 0.16))
-                    Text(e.title).font(.system(size: cardH * 0.17, weight: .bold)).foregroundColor(wc(t.skin.ink)).lineLimit(1)
+                    Text(e.icon).font(.system(size: cardH * 0.24))
+                    Text(e.title).font(.system(size: cardH * 0.24, weight: .bold)).foregroundColor(wc(t.skin.ink)).lineLimit(1)
                 }
                 Text("\(e.date.replacingOccurrences(of: "-", with: ".")) \(weekName(e.weekday))")
-                    .font(.system(size: cardH * 0.13)).foregroundColor(wc(t.skin.inkSoft)).lineLimit(1)
+                    .font(.system(size: cardH * 0.20)).foregroundColor(wc(t.skin.inkSoft)).lineLimit(1)
                 Spacer(minLength: 1)
                 HStack { Spacer(); Text(daysText(e.days)).font(.system(size: cardH * 0.30, weight: .bold)).foregroundColor(wc(t.skin.brand)) }
             }
-            .padding(cardH * 0.11)
+            .padding(cardH * 0.10)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             .background(wc(t.skin.rowBg)).clipShape(RoundedRectangle(cornerRadius: cardH * 0.14))
         } else {
@@ -597,6 +616,19 @@ private struct WidgetModal: View {
     @Environment(\.dismiss) private var dismiss
     let t: WidgetTemplate
     @State private var setting = false
+    @State private var showStyle = false
+
+    /// 外观调色板：空 hex 表示沿用组件默认色
+    private struct PaletteColor: Identifiable {
+        let name: String
+        let hex: String
+        var id: String { name }
+    }
+    private let colorPalette: [PaletteColor] = [
+        .init(name: "默认", hex: ""), .init(name: "暖白", hex: "#FBFAF7"), .init(name: "米色", hex: "#F3EAD9"),
+        .init(name: "浅粉", hex: "#FBEDF0"), .init(name: "薄荷", hex: "#EEF0E6"), .init(name: "天蓝", hex: "#DBE7F1"),
+        .init(name: "青绿", hex: "#5C9E96"), .init(name: "深灰", hex: "#3A3835"), .init(name: "纯白", hex: "#FFFFFF")
+    ]
 
     @MainActor private var binding: WidgetBinding { store.bindings[t.id] ?? .empty }
     @MainActor private var count: Int { pickWidgetEvents(t, store: store).count }
@@ -634,14 +666,77 @@ private struct WidgetModal: View {
                         .font(.system(size: 11)).foregroundColor(Color(hex: "#a19d97"))
                 }
                 let ps = previewPointSize(t.size)
-                WidgetPreviewView(t: t, evs: boundWidgetEvents(t, store: store), holiday: store.holiday, mini: false)
+                WidgetPreviewView(t: t, evs: boundWidgetEvents(t, store: store), holiday: store.holiday, mini: false, theme: store.widgetThemes[t.id])
                     .frame(width: ps.width, height: ps.height)
                     .clipShape(RoundedRectangle(cornerRadius: t.size == "small" ? 26 : 22))
                     .shadow(color: .black.opacity(0.12), radius: 10, y: 4)
+                styleSection
                 Text("在系统桌面长按空白处添加「纪念日」小组件，即可看到本页同款组件。组件数据随事件增删改自动更新。")
                     .font(.system(size: 11)).foregroundColor(Theme.muted)
             }
             .frame(maxWidth: .infinity)
+        }
+    }
+
+    /// 外观设置：每款组件独立保存背景色与字体色，实时作用于 App 预览与桌面组件
+    private var styleSection: some View {
+        let theme = store.widgetThemes[t.id] ?? .default
+        return VStack(alignment: .leading, spacing: 10) {
+            Button { withAnimation { showStyle.toggle() } } label: {
+                HStack {
+                    Text("🎨 外观设置（背景 / 字体颜色）")
+                        .font(.system(size: 13, weight: .semibold)).foregroundColor(Theme.ink)
+                    Spacer()
+                    Image(systemName: showStyle ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 12)).foregroundColor(Theme.muted)
+                }
+            }
+            .buttonStyle(.plain)
+
+            if showStyle {
+                colorRow(title: "背景颜色", current: theme.bg) { v in
+                    var th = store.widgetThemes[t.id] ?? .default
+                    th.bg = v
+                    store.saveWidgetTheme(th, for: t.id)
+                }
+                colorRow(title: "字体颜色", current: theme.ink) { v in
+                    var th = store.widgetThemes[t.id] ?? .default
+                    th.ink = v
+                    store.saveWidgetTheme(th, for: t.id)
+                }
+                Text("浅色背景建议搭配深色字体；选择「默认」可恢复该组件的原始配色。")
+                    .font(.system(size: 10)).foregroundColor(Theme.muted)
+                Button("恢复默认配色") { store.saveWidgetTheme(.default, for: t.id) }
+                    .font(.system(size: 12)).foregroundColor(Theme.accent)
+            }
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(uiColor: .secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
+    private func colorRow(title: String, current: String?, choose: @escaping (String?) -> Void) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title).font(.system(size: 12, weight: .medium)).foregroundColor(Theme.muted)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(colorPalette, id: \.name) { item in
+                        let on = (current ?? "") == item.hex
+                        Button { choose(item.hex.isEmpty ? nil : item.hex) } label: {
+                            VStack(spacing: 3) {
+                                Circle()
+                                    .fill(item.hex.isEmpty ? Color(uiColor: .systemBackground) : Color(hex: item.hex))
+                                    .frame(width: 26, height: 26)
+                                    .overlay(Circle().stroke(on ? Theme.accent : Theme.line, lineWidth: on ? 2 : 1))
+                                Text(item.name).font(.system(size: 9)).foregroundColor(on ? Theme.ink : Theme.muted)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.vertical, 2)
+            }
         }
     }
 
