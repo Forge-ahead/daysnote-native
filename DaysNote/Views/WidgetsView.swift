@@ -101,6 +101,15 @@ private struct WidgetTemplate: Identifiable, Equatable {
 private func sizeLabel(_ s: String) -> String { s == "small" ? "小" : (s == "medium" ? "中" : "大") }
 private func gridLabel(_ s: String) -> String { s == "small" ? "2×2" : (s == "medium" ? "4×2" : "4×4") }
 private func ptLabel(_ s: String) -> String { s == "small" ? "158×158" : (s == "medium" ? "338×158" : "338×338") }
+/// 预览弹层用的实际展示尺寸（按物理 pt 等比缩放）。必须同时给宽高，
+/// 否则内部 GeometryReader 会把高度撑成竖长方形。
+private func previewPointSize(_ s: String) -> CGSize {
+    switch s {
+    case "small":  return CGSize(width: 158, height: 158)              // 2×2
+    case "medium": return CGSize(width: 326, height: 326 * 158 / 338)  // 4×2 等比
+    default:       return CGSize(width: 300, height: 300)              // 4×4 等比
+    }
+}
 private func weekdayIndex(_ d: Date) -> Int {
     Calendar(identifier: .gregorian).component(.weekday, from: d) - 1
 }
@@ -110,9 +119,10 @@ private func shortDate(_ iso: String) -> String {
     return "\(p[p.count - 2])/\(p[p.count - 1])"
 }
 private func daysText(_ n: Int) -> String { n > 365 ? String(format: "%.2f年", Double(n) / 365.0) : "\(n)" }
-/// 与桌面小组件一致：大号数字 + 小号单位（近=天 / 远=年）
-private func dayParts(_ n: Int) -> (num: String, unit: String) {
-    if n > 365 { return (String(format: "%.2f", Double(n) / 365.0), "年") }
+/// 与桌面小组件一致：大号数字 + 小号单位（近=天 / 远=年）。
+/// useYear=false 时始终按「天」显示原始天数，供 2×2 纯数字款使用。
+private func dayParts(_ n: Int, useYear: Bool = true) -> (num: String, unit: String) {
+    if useYear && n > 365 { return (String(format: "%.2f", Double(n) / 365.0), "年") }
     return ("\(n)", "天")
 }
 
@@ -388,14 +398,15 @@ private struct SimplePanel: View {
                     let base = i < 2 ? wc(t.skin.hot) : wc(t.skin.far)
                     HStack(spacing: 4) {
                         HStack(spacing: 3) {
-                            Text(e.title).font(.system(size: rowH * 0.34, weight: .semibold)).foregroundColor(wc(t.skin.ink)).lineLimit(1)
-                            if !e.icon.isEmpty { Text(e.icon).font(.system(size: rowH * 0.30)) }
+                            // 2×2 纯数字款（withTian=false）：缩小标题字号，不显示图标
+                            Text(e.title).font(.system(size: rowH * (withTian ? 0.34 : 0.26), weight: .semibold)).foregroundColor(wc(t.skin.ink)).lineLimit(1)
+                            if withTian && !e.icon.isEmpty { Text(e.icon).font(.system(size: rowH * 0.30)) }
                         }
                         Spacer(minLength: 2)
-                        // 数字块贴右缘：蓝色近事件显示「天」，橘红远事件（超一年）显示「年」；纯数字款不显示单位
-                        let p = dayParts(e.days)
+                        // 纯数字款始终按「天」计数，不换算成年；带天款蓝色显示天、橘红（超一年）显示年
+                        let p = dayParts(e.days, useYear: withTian)
                         HStack(alignment: .bottom, spacing: 1) {
-                            Text(p.num).font(.system(size: rowH * 0.42, weight: .bold)).foregroundColor(.white).lineLimit(1)
+                            Text(p.num).font(.system(size: rowH * (withTian ? 0.42 : 0.36), weight: .bold)).foregroundColor(.white).lineLimit(1)
                             if withTian {
                                 Text(p.unit).font(.system(size: rowH * 0.20, weight: .semibold))
                                     .foregroundColor(.white.opacity(0.94)).padding(.bottom, rowH * 0.05)
@@ -570,9 +581,9 @@ private struct WidgetModal: View {
                     Text("固定 \(gridLabel(t.size)) · \(ptLabel(t.size)) pt（此组件仅有该规格）")
                         .font(.system(size: 11)).foregroundColor(Color(hex: "#a19d97"))
                 }
+                let ps = previewPointSize(t.size)
                 WidgetPreviewView(t: t, evs: boundWidgetEvents(t, store: store), holiday: store.holiday, mini: false)
-                    .frame(width: t.size == "small" ? 158 : (t.size == "medium" ? 326 : 300))
-                    .aspectRatio(t.size == "medium" ? 338.0 / 158.0 : 1.0, contentMode: .fit)
+                    .frame(width: ps.width, height: ps.height)
                     .clipShape(RoundedRectangle(cornerRadius: t.size == "small" ? 26 : 22))
                     .shadow(color: .black.opacity(0.12), radius: 10, y: 4)
                 Text("在系统桌面长按空白处添加「纪念日」小组件，即可看到本页同款组件。组件数据随事件增删改自动更新。")
