@@ -8,8 +8,8 @@ options:
 
 settings:
   SWIFT_VERSION: "5.0"
-  MARKETING_VERSION: "3.1.8"
-  CURRENT_PROJECT_VERSION: "40"
+  MARKETING_VERSION: "3.1.9"
+  CURRENT_PROJECT_VERSION: "41"
   TARGETED_DEVICE_FAMILY: "1,2"
   CODE_SIGN_IDENTITY: ""
 
@@ -26,11 +26,13 @@ targets:
       path: DaysNote/Info.plist
       properties:
         CFBundleDisplayName: 纪念日
-        CFBundleShortVersionString: "3.1.8"
-        CFBundleVersion: "40"
+        CFBundleShortVersionString: "3.1.9"
+        CFBundleVersion: "41"
         UILaunchScreen: {}
         ITSAppUsesNonExemptEncryption: false
         MinimumOSVersion: "15.0"
+        NSSpeechRecognitionUsageDescription: "使用系统语音识别把你说的话转成文字，用于一句话管理事件。"
+        NSMicrophoneUsageDescription: "用于语音录入，把你说的话转成文字后管理事件。"
     entitlements:
       path: DaysNote/DaysNote.entitlements
     settings:
@@ -53,8 +55,8 @@ targets:
     info:
       path: DaysNoteWidget/Info.plist
       properties:
-        CFBundleShortVersionString: "3.1.8"
-        CFBundleVersion: "40"
+        CFBundleShortVersionString: "3.1.9"
+        CFBundleVersion: "41"
         MinimumOSVersion: "15.0"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
